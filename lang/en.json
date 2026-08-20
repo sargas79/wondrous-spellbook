@@ -15,6 +15,7 @@
   "BWS.Creator.TraditionLabel": "Tradition",
   "BWS.Creator.RankLabel": "Rank",
   "BWS.Creator.RankAll": "All",
+  "BWS.Creator.RankAllAria": "All ranks",
   "BWS.Creator.RankAllHint": "All ranks (shift-click a rank to select a range)",
   "BWS.Creator.SearchLabel": "Search",
   "BWS.Creator.SearchPlaceholder": "Name or trait...",

@@ -36,7 +36,7 @@
       {{#each rankOptions}}
         <button type="button" class="bws-chip{{#if active}} is-active{{/if}}"
                 data-action="setRank" data-rank="{{key}}"
-                data-tooltip="{{title}}" aria-label="{{title}}"
+                data-tooltip="{{title}}" aria-label="{{aria}}"
                 aria-pressed="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>
       {{/each}}
     </div>

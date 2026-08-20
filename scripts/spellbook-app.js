@@ -135,16 +135,21 @@ export class SpellbookApp extends HandlebarsApplicationMixin(ApplicationV2) {
       rankOptions: [
         {
           key: "all",
-          // Badges are short by design, so the chips stay compact; the full rank name
-          // rides along in the tooltip and accessible name.
+          // `aria` is kept separate from `title`: an accessible name should name the
+          // control, so it starts with the visible label and leaves the shift-click
+          // gesture to the tooltip rather than reading it out on every focus.
           label: game.i18n.localize("BWS.Creator.RankAll"),
           title: game.i18n.localize("BWS.Creator.RankAllHint"),
+          aria: game.i18n.localize("BWS.Creator.RankAllAria"),
           active: this.ranks.size === 0
         },
+        // Badges are short by design, so the chips stay compact; the full rank name
+        // carries the meaning for tooltips and screen readers.
         ...RANKS.map((rank) => ({
           key: String(rank),
           label: getRankBadge(rank),
           title: getRankLabel(rank),
+          aria: getRankLabel(rank),
           active: this.ranks.has(rank)
         }))
       ],
