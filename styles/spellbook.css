@@ -824,13 +824,9 @@
 }
 
 /* -------------------------------------------------- *
- * Sidebar button
+ * Scene controls button
  * -------------------------------------------------- */
 
-.bws-sidebar-button {
-  cursor: pointer;
-}
-
-.bws-sidebar-button:hover {
+[data-tool="bws-spellbook"]:hover {
   color: #7c6df2;
 }

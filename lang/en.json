@@ -3,8 +3,8 @@
 
   "BWS.Settings.SheetIntegration.Name": "Character Sheet Integration",
   "BWS.Settings.SheetIntegration.Hint": "Inject an animation configuration button into spell rows on the PF2e character sheet. Only visible while JB2A and Sequencer are both active.",
-  "BWS.Settings.SidebarButton.Name": "Show Sidebar Button",
-  "BWS.Settings.SidebarButton.Hint": "Add a spellbook button to the bottom of the sidebar control column.",
+  "BWS.Settings.SidebarButton.Name": "Show Toolbar Button",
+  "BWS.Settings.SidebarButton.Hint": "Add a spellbook button to the scene controls toolbar on the left of the canvas.",
   "BWS.Settings.FolderName.Name": "Spellbook Folder Name",
   "BWS.Settings.FolderName.Hint": "Name of the Journal Entry folder that stores every spellbook.",
 

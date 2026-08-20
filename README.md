@@ -63,7 +63,7 @@ git clone https://github.com/sargas79/wondrous-spellbook.git blizzards-wondrous-
 
 ## Usage
 
-1. Click the **book icon** at the bottom of the sidebar control column to open *My Spellbooks*.
+1. Click the **book icon** in the scene controls toolbar on the left of the canvas to open *My Spellbooks*.
 2. Hit **New** to open the Spellbook Creator.
 3. Filter by tradition, toggle focus spells, or search by name or trait.
 4. **Tick a spell** to add it to the book. **Click the ↓ arrow** to send that spell directly to
@@ -109,7 +109,7 @@ delete controls are disabled per-row for anyone without OWNER on that entry.
 | Setting | Scope | Default | Description |
 |---|---|---|---|
 | Character Sheet Integration | World | On | Inject the animation gear button into PF2e spell rows |
-| Show Sidebar Button | Client | On | Add the spellbook button to the sidebar control column |
+| Show Toolbar Button | Client | On | Add the spellbook button to the scene controls toolbar |
 | Spellbook Folder Name | World | `Blizzard's Spellbooks` | Journal folder that stores every spellbook |
 
 ---
@@ -138,7 +138,7 @@ lang/en.json                     All UI strings
 styles/spellbook.css             Nocturne-flavoured dark theme, scoped to .bws
 scripts/
   constants.js                   Shared ids, settings keys, template path helper
-  main.js                        init/ready hooks, settings, sidebar button
+  main.js                        init/ready hooks, settings, scene control button
   spell-query.js                 Compendium query, filtering, rank grouping
   persistence.js                 Folder + JournalEntry writes, ownership rules
   spellbook-app.js               Spellbook Creator (ApplicationV2)
