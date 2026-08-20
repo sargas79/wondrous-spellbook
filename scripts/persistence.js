@@ -66,7 +66,7 @@ export function buildOwnership(creatorId = game.user.id) {
  * @param {object[]} spells Stored spell records.
  * @returns {string} HTML table grouped by rank.
  */
-function renderSpellsPage(spells) {
+export function renderSpellsPage(spells) {
   if (!spells.length) return `<p><em>${game.i18n.localize("BWS.Creator.SelectedEmpty")}</em></p>`;
 
   const byRank = new Map();
@@ -106,7 +106,7 @@ function renderSpellsPage(spells) {
  * @param {object} spell A normalised spell record.
  * @returns {object} Storable record.
  */
-function toStoredSpell(spell) {
+export function toStoredSpell(spell) {
   return {
     uuid: spell.uuid,
     id: spell.id,

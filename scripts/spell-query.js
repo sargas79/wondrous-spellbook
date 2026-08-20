@@ -24,6 +24,12 @@ export const MAX_RANK = 10;
 export const RANKS = Object.freeze(Array.from({ length: MAX_RANK + 1 }, (_, i) => i));
 
 /**
+ * @type {readonly string[]} PF2e rarity slugs, ascending. Index order is meaningful:
+ * the loot generator keeps every spell at or below a chosen ceiling.
+ */
+export const RARITIES = Object.freeze(["common", "uncommon", "rare", "unique"]);
+
+/**
  * Cached compendium read. Building this is expensive (it loads every spell document
  * in every pack), so it is done once and reused for all subsequent filtering.
  * @type {{ spells: object[], packCount: number } | null}
@@ -71,6 +77,17 @@ export function getSpellTraditions(spell) {
   const explicit = spell?.system?.traits?.traditions;
   const source = Array.isArray(explicit) ? explicit : getSpellTraits(spell);
   return source.map((t) => String(t).toLowerCase()).filter((t) => TRADITIONS.includes(t));
+}
+
+/**
+ * Read a spell's rarity.
+ * @param {object} spell A SpellPF2e document or raw spell source.
+ * @returns {string} One of common/uncommon/rare/unique.
+ */
+export function getSpellRarity(spell) {
+  const raw = spell?.system?.traits?.rarity ?? spell?.rarity;
+  const rarity = typeof raw === "string" ? raw.toLowerCase() : "";
+  return RARITIES.includes(rarity) ? rarity : "common";
 }
 
 /**
@@ -177,6 +194,7 @@ function normaliseSpell(spell, packId) {
     })),
     traits: getSpellTraits(spell),
     category: getSpellCategory(spell),
+    rarity: getSpellRarity(spell),
     isFocus: isFocusSpell(spell),
     isRitual: isRitual(spell),
     isCantrip: rank === 0,

@@ -21,6 +21,9 @@ in this module's windows.
 - **Send to Slot** — the one write path from a spellbook to an actor. Pick a spellcasting entry
   and a rank; the spell is created as an embedded item bound to that entry, so it appears in the
   sheet's own spellcasting tab.
+- **Loot Spellbooks** — roll a random, level-appropriate spellbook as treasure. The result
+  is a physical PF2e item you can drop in a chest or hand to a party; whoever holds it can
+  open it and learn spells straight out of it.
 - **Animations (optional)** — when JB2A *and* Sequencer are both active, spell rows on the
   character sheet gain a gear button for attaching a Sequencer effect that fires when the spell
   is cast.
@@ -80,6 +83,32 @@ open slot; spontaneous and innate entries just receive the spell.
 If the actor has no spellcasting entries, the dialog says so rather than offering an empty
 dropdown.
 
+### Rolling a spellbook as treasure
+
+GMs get a **Roll loot** button in *My Spellbooks*. Pick a level, a tradition and a book
+size; the generator rolls a spell list capped at the rank that level can hold, previews
+it, and lets you swap or drop individual pages before committing.
+
+**Create item** writes the book either into the `Spellbook Loot` item folder or straight
+onto the selected token's actor. It is an ordinary `equipment` item — priced, rarity-tagged
+and carrying a readable spell list in its description — so it drags into loot chests and
+inventories like any other treasure.
+
+Generation is seeded, and the seed is stored on the item. Re-entering a seed with the same
+settings rolls the same book again. Editing a book by hand marks it as edited, because it
+no longer reproduces from its seed.
+
+### Learning from a loot spellbook
+
+Open the item and click **Open spellbook** in its sheet header (or right-click it in the
+Items directory). Each spell has a **Learn** button, which opens the same *Send to Slot*
+dialog the Spellbook Creator uses — so learning goes through one write path with all its
+prepared-slot and heightening handling intact.
+
+The reader learns as the actor carrying the book, falling back to the selected token or
+assigned character. Who learned what is recorded on the book, so a shared grimoire
+remembers which characters have already copied a spell out of it.
+
 ### Attaching an animation
 
 With JB2A and Sequencer both active, each spell row on the PF2e character sheet grows a small
@@ -111,6 +140,11 @@ delete controls are disabled per-row for anyone without OWNER on that entry.
 | Character Sheet Integration | World | On | Inject the animation gear button into PF2e spell rows |
 | Show Toolbar Button | Client | On | Add the spellbook button to the scene controls toolbar |
 | Spellbook Folder Name | World | `Blizzard's Spellbooks` | Journal folder that stores every spellbook |
+| Loot Spellbook Folder Name | World | `Spellbook Loot` | Item folder that stores generated loot spellbooks |
+| Default Loot Book Size | World | Grimoire | Book shape the loot generator starts on |
+| Loot Rarity Ceiling | World | Common | Rarest spell a generated book may contain |
+| Track Learned Spells | World | On | Record which characters copied each spell out of a book |
+| Spend Pages On Learning | World | Off | A learned page is spent for that character only; the book survives |
 
 ---
 
@@ -126,6 +160,20 @@ api.openBrowser();                          // open My Spellbooks
 api.sendToSlot({ uuid: "Compendium....." }); // open the Send to Slot dialog
 api.getUserSpellbooks();                    // JournalEntry[] the current user may see
 api.getAnimationsAvailable();               // boolean, re-evaluated live
+
+api.openLootGenerator();                    // open the loot roller (GM)
+api.generateLootSpellbook({ level: 7 });    // headless roll -> { spells, meta, name }
+api.createLootSpellbook({ name, spells, meta, actors: [] }); // write it as an Item
+api.openLootBook(item);                     // open a rolled book's reader
+api.isLootSpellbook(item);                  // boolean
+```
+
+`generateLootSpellbook` writes nothing, so it can be driven from a RollTable macro:
+
+```js
+const api = game.modules.get("blizzards-wondrous-spellbook").api;
+const roll = await api.generateLootSpellbook({ level: 12, tradition: "occult" });
+await api.createLootSpellbook({ ...roll, actors: [game.actors.getName("Treasure Chest")] });
 ```
 
 ---
@@ -144,6 +192,9 @@ scripts/
   spellbook-app.js               Spellbook Creator (ApplicationV2)
   my-spellbooks-app.js           My Spellbooks browser (ApplicationV2)
   slot-manager.js                Send to Slot dialog, character sheet injection
+  loot-generator.js              Seeded random book rolling, pricing, Item creation
+  loot-generator-app.js          Loot Spellbook Generator (GM, ApplicationV2)
+  loot-book-app.js               Loot book reader, learn flow, item sheet injection
   animation-config.js            JB2A/Sequencer detection, config dialog, cast hooks
 templates/                       Handlebars templates for the above
 ```

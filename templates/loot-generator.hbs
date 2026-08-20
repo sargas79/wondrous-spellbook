@@ -1,0 +1,153 @@
+{{!-- GM-facing loot roller: parameters on top, rolled preview below. --}}
+<div class="bws-loot-inner">
+
+  <section class="bws-loot-form">
+    <div class="bws-field bws-loot-field-level">
+      <span class="bws-field-label">{{localize "BWS.Loot.LevelLabel"}}</span>
+      <input type="number" name="level" min="1" max="{{maxLevel}}" step="1" value="{{level}}" />
+      <span class="bws-field-hint">{{localize "BWS.Loot.MaxRankHint" rank=maxRank}}</span>
+    </div>
+
+    <div class="bws-field">
+      <span class="bws-field-label">{{localize "BWS.Loot.TraditionLabel"}}</span>
+      <select name="tradition">
+        {{#each traditions}}
+          <option value="{{key}}" {{selected selected}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="bws-field">
+      <span class="bws-field-label">{{localize "BWS.Loot.ProfileLabel"}}</span>
+      <select name="profile">
+        {{#each profiles}}
+          <option value="{{key}}" {{selected selected}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="bws-field">
+      <span class="bws-field-label">{{localize "BWS.Loot.RarityLabel"}}</span>
+      <select name="maxRarity">
+        {{#each rarities}}
+          <option value="{{key}}" {{selected selected}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="bws-field">
+      <span class="bws-field-label">{{localize "BWS.Loot.CountLabel"}}</span>
+      <input type="number" name="count" min="1" max="60" step="1" value="{{count}}"
+             placeholder="{{localize 'BWS.Loot.CountAuto'}}" />
+    </div>
+
+    <div class="bws-field bws-loot-field-seed">
+      <span class="bws-field-label">{{localize "BWS.Loot.SeedLabel"}}</span>
+      <div class="bws-seed-row">
+        <input type="text" name="seed" value="{{seed}}" spellcheck="false" />
+        <button type="button" class="bws-icon-button" data-action="newSeed"
+                data-tooltip="{{localize 'BWS.Loot.NewSeed'}}"
+                aria-label="{{localize 'BWS.Loot.NewSeed'}}">
+          <i class="fa-solid fa-dice"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="bws-loot-toggles">
+      <label class="bws-checkbox">
+        <input type="checkbox" name="includeCantrips" {{checked includeCantrips}} />
+        <span>{{localize "BWS.Loot.IncludeCantrips"}}</span>
+      </label>
+      <label class="bws-checkbox">
+        <input type="checkbox" name="includeFocus" {{checked includeFocus}} />
+        <span>{{localize "BWS.Creator.IncludeFocus"}}</span>
+      </label>
+      <button type="button" class="bws-button bws-button-small" data-action="reroll">
+        <i class="fa-solid fa-rotate"></i> {{localize "BWS.Loot.Reroll"}}
+      </button>
+    </div>
+  </section>
+
+  <section class="bws-loot-result">
+    <div class="bws-loot-summary">
+      <span class="bws-loot-summary-line">{{summaryLine}}</span>
+      {{#if edited}}
+        <span class="bws-loot-tag"><i class="fa-solid fa-pen"></i> {{localize "BWS.Loot.EditedTag"}}</span>
+      {{/if}}
+    </div>
+    {{#if shortfall}}
+      <p class="bws-loot-warning">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        {{localize "BWS.Loot.Shortfall" count=shortfall}}
+      </p>
+    {{/if}}
+  </section>
+
+  <div class="bws-loot-preview">
+    {{#if hasSpells}}
+      {{#each groups}}
+        <div class="bws-group-header">
+          <span class="bws-group-title">{{label}}</span>
+        </div>
+        {{#each spells}}
+          <div class="bws-spell-row">
+            <span class="bws-rank-badge">{{rankBadge}}</span>
+            <span class="bws-spell-name" title="{{name}}">{{name}}</span>
+            <span class="bws-traditions">
+              {{#each traditionTags}}<span class="bws-pill bws-pill-{{key}}">{{label}}</span>{{/each}}
+            </span>
+            <button type="button" class="bws-icon-button" data-action="rerollSpell" data-uuid="{{uuid}}"
+                    data-tooltip="{{localize 'BWS.Loot.RerollSpell'}}"
+                    aria-label="{{localize 'BWS.Loot.RerollSpell'}}">
+              <i class="fa-solid fa-dice-d20"></i>
+            </button>
+            <button type="button" class="bws-icon-button bws-icon-danger" data-action="removeSpell" data-uuid="{{uuid}}"
+                    data-tooltip="{{localize 'BWS.Loot.RemoveSpell'}}"
+                    aria-label="{{localize 'BWS.Loot.RemoveSpell'}}">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        {{/each}}
+      {{/each}}
+    {{else}}
+      <div class="bws-empty">
+        <i class="fa-solid fa-book-skull"></i>
+        <p class="bws-empty-title">{{localize "BWS.Loot.EmptyRoll"}}</p>
+        <p class="bws-empty-hint">{{localize "BWS.Loot.EmptyRollHint"}}</p>
+      </div>
+    {{/if}}
+  </div>
+
+  <footer class="bws-loot-footer">
+    <div class="bws-field bws-loot-field-name">
+      <span class="bws-field-label">{{localize "BWS.Loot.NameLabel"}}</span>
+      <input type="text" name="bookName" value="{{bookName}}"
+             placeholder="{{localize 'BWS.Loot.NamePlaceholder'}}" />
+    </div>
+
+    <div class="bws-loot-targets">
+      <label class="bws-checkbox">
+        <input type="radio" name="target" value="directory" {{checked targetIsDirectory}} />
+        <span>{{localize "BWS.Loot.TargetFolder" folder=folderName}}</span>
+      </label>
+      <label class="bws-checkbox">
+        <input type="radio" name="target" value="selected" {{checked targetIsSelected}} />
+        <span>{{localize "BWS.Loot.TargetSelected" count=selectedCount}}</span>
+      </label>
+      {{#if targetIsSelected}}
+        <span class="bws-field-hint">
+          {{#if selectedCount}}{{selectedNames}}{{else}}{{localize "BWS.Loot.NoSelection"}}{{/if}}
+        </span>
+      {{/if}}
+    </div>
+
+    <div class="bws-loot-actions">
+      <button type="button" class="bws-button bws-button-primary" data-action="create"
+              {{#unless canCreate}}disabled{{/unless}}>
+        <i class="fa-solid fa-book-sparkles"></i> {{localize "BWS.Loot.Create"}}
+      </button>
+      <button type="button" class="bws-button" data-action="cancel">{{localize "BWS.Creator.Cancel"}}</button>
+    </div>
+  </footer>
+
+</div>

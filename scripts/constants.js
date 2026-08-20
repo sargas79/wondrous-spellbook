@@ -14,14 +14,29 @@ export const MODULE_PATH = `modules/${MODULE_ID}`;
 /** Default name of the Journal Entry folder that stores every spellbook. */
 export const DEFAULT_FOLDER_NAME = "Blizzard's Spellbooks";
 
+/** Default name of the Item folder that stores generated loot spellbooks. */
+export const DEFAULT_LOOT_FOLDER_NAME = "Spellbook Loot";
+
 /** Flag key on a JournalEntry holding the array of stored spell records. */
 export const SPELLS_FLAG = "spells";
+
+/**
+ * Flag key on a physical Item holding the loot metadata (seed, level, learned map).
+ * The spell list itself lives under {@link SPELLS_FLAG}, so every reader helper in
+ * `persistence.js` works on a loot book exactly as it does on a spellbook journal.
+ */
+export const LOOT_FLAG = "loot";
 
 /** Settings keys. */
 export const SETTINGS = Object.freeze({
   SHEET_INTEGRATION: "enableSheetIntegration",
   SIDEBAR_BUTTON: "showSidebarButton",
-  FOLDER_NAME: "folderName"
+  FOLDER_NAME: "folderName",
+  LOOT_FOLDER_NAME: "lootFolderName",
+  LOOT_PROFILE: "lootDefaultProfile",
+  LOOT_MAX_RARITY: "lootMaxRarity",
+  TRACK_LEARNED: "trackLearned",
+  CONSUME_ON_LEARN: "consumeOnLearn"
 });
 
 /**

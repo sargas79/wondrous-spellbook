@@ -9,6 +9,7 @@
 import { MODULE_ID, template } from "./constants.js";
 import { deleteSpellbook, getFolderName, getUserSpellbooks, summariseSpellbook } from "./persistence.js";
 import { SpellbookApp } from "./spellbook-app.js";
+import { LootGeneratorApp } from "./loot-generator-app.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -26,6 +27,7 @@ export class MySpellbooksApp extends HandlebarsApplicationMixin(ApplicationV2) {
     position: { width: 460, height: 520 },
     actions: {
       create: MySpellbooksApp.#onCreate,
+      rollLoot: MySpellbooksApp.#onRollLoot,
       open: MySpellbooksApp.#onOpen,
       edit: MySpellbooksApp.#onEdit,
       remove: MySpellbooksApp.#onRemove
@@ -45,6 +47,8 @@ export class MySpellbooksApp extends HandlebarsApplicationMixin(ApplicationV2) {
       ...(await super._prepareContext(options)),
       books,
       hasBooks: books.length > 0,
+      // Rolling loot writes a world Item, which only a GM may do.
+      isGM: game.user.isGM,
       folderLine: game.i18n.format("BWS.Browser.FolderLine", { folder: getFolderName() }),
       scopeLine: game.user.isGM
         ? game.i18n.format("BWS.Browser.GMSeesAll", { count: books.length })
@@ -55,6 +59,11 @@ export class MySpellbooksApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Open a blank creator window. */
   static async #onCreate() {
     new SpellbookApp().render(true);
+  }
+
+  /** Open the random loot spellbook generator. */
+  static async #onRollLoot() {
+    new LootGeneratorApp().render(true);
   }
 
   /** Open the underlying journal entry. */

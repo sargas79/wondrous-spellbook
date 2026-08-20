@@ -5,7 +5,7 @@
  * character sheet integration and the spell-cast animation listeners at `ready`.
  */
 
-import { MODULE_ID, SETTINGS, DEFAULT_FOLDER_NAME } from "./constants.js";
+import { MODULE_ID, SETTINGS, DEFAULT_FOLDER_NAME, DEFAULT_LOOT_FOLDER_NAME } from "./constants.js";
 
 /** Name of the scene control tool that opens the spellbook browser. */
 const TOOL_NAME = "bws-spellbook";
@@ -14,6 +14,13 @@ import { MySpellbooksApp, registerBrowserRefreshHooks } from "./my-spellbooks-ap
 import { injectSheetControls, openSendToSlotDialog, resolveTargetActor } from "./slot-manager.js";
 import { getAnimationsAvailable, registerAnimationHooks } from "./animation-config.js";
 import { invalidateSpellCache, querySpells } from "./spell-query.js";
+import { LootGeneratorApp } from "./loot-generator-app.js";
+import {
+  injectLootBookButton,
+  openLootBook,
+  registerLootBookContextMenu
+} from "./loot-book-app.js";
+import * as loot from "./loot-generator.js";
 import * as persistence from "./persistence.js";
 
 /**
@@ -47,6 +54,61 @@ function registerSettings() {
     config: true,
     type: String,
     default: DEFAULT_FOLDER_NAME
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.LOOT_FOLDER_NAME, {
+    name: "BWS.Settings.LootFolderName.Name",
+    hint: "BWS.Settings.LootFolderName.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    default: DEFAULT_LOOT_FOLDER_NAME
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.LOOT_PROFILE, {
+    name: "BWS.Settings.LootProfile.Name",
+    hint: "BWS.Settings.LootProfile.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      traveler: "BWS.Loot.Profile.traveler",
+      grimoire: "BWS.Loot.Profile.grimoire",
+      archmage: "BWS.Loot.Profile.archmage"
+    },
+    default: "grimoire"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.LOOT_MAX_RARITY, {
+    name: "BWS.Settings.LootMaxRarity.Name",
+    hint: "BWS.Settings.LootMaxRarity.Hint",
+    scope: "world",
+    config: true,
+    type: String,
+    choices: {
+      common: "BWS.Loot.Rarity.common",
+      uncommon: "BWS.Loot.Rarity.uncommon",
+      rare: "BWS.Loot.Rarity.rare"
+    },
+    default: "common"
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.TRACK_LEARNED, {
+    name: "BWS.Settings.TrackLearned.Name",
+    hint: "BWS.Settings.TrackLearned.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
+
+  game.settings.register(MODULE_ID, SETTINGS.CONSUME_ON_LEARN, {
+    name: "BWS.Settings.ConsumeOnLearn.Name",
+    hint: "BWS.Settings.ConsumeOnLearn.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
   });
 }
 
@@ -111,6 +173,10 @@ Hooks.once("init", () => {
     getAnimationsAvailable,
     querySpells,
     invalidateSpellCache,
+    LootGeneratorApp,
+    openLootGenerator: (options = {}) => new LootGeneratorApp(options).render(true),
+    openLootBook,
+    ...loot,
     ...persistence
   };
 
@@ -128,6 +194,7 @@ Hooks.once("ready", () => {
 
   registerAnimationHooks();
   registerBrowserRefreshHooks();
+  registerLootBookContextMenu();
 
   // The spell cache is built from compendium contents, so drop it when a pack changes.
   Hooks.on("createItem", (item) => {
@@ -141,6 +208,20 @@ Hooks.once("ready", () => {
 });
 
 Hooks.on("getSceneControlButtons", injectSceneControlButton);
+
+// A loot spellbook is an ordinary physical item, so its sheet is PF2e's own. The
+// "open spellbook" control is injected on render instead of the sheet being subclassed.
+// ApplicationV2 fires a render hook for every class in the sheet's inheritance chain,
+// so both names are listened for and the injection de-duplicates itself.
+for (const hook of ["renderItemSheetPF2e", "renderPhysicalItemSheetPF2e"]) {
+  Hooks.on(hook, (app, html) => {
+    try {
+      injectLootBookButton(app, html);
+    } catch (err) {
+      console.error(`${MODULE_ID} | Loot spellbook sheet integration failed`, err);
+    }
+  });
+}
 
 // PF2e's character sheet render hook. Availability of JB2A/Sequencer is re-checked
 // inside the handler on every render, so toggling either module mid-session takes
