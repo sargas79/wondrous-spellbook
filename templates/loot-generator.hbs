@@ -13,7 +13,7 @@
       <label for="bws-loot-tradition">{{localize "BWS.Loot.TraditionLabel"}}</label>
       <select id="bws-loot-tradition" name="tradition">
         {{#each traditions}}
-          <option value="{{key}}" {{selected selected}}>{{label}}</option>
+          <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
         {{/each}}
       </select>
     </div>
@@ -22,7 +22,7 @@
       <label for="bws-loot-profile">{{localize "BWS.Loot.ProfileLabel"}}</label>
       <select id="bws-loot-profile" name="profile">
         {{#each profiles}}
-          <option value="{{key}}" {{selected selected}}>{{label}}</option>
+          <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
         {{/each}}
       </select>
     </div>
@@ -31,7 +31,7 @@
       <label for="bws-loot-rarity">{{localize "BWS.Loot.RarityLabel"}}</label>
       <select id="bws-loot-rarity" name="maxRarity">
         {{#each rarities}}
-          <option value="{{key}}" {{selected selected}}>{{label}}</option>
+          <option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>
         {{/each}}
       </select>
     </div>
@@ -57,11 +57,11 @@
 
     <div class="bws-loot-toggles">
       <label class="bws-checkbox">
-        <input type="checkbox" name="includeCantrips" {{checked includeCantrips}} />
+        <input type="checkbox" name="includeCantrips" {{#if includeCantrips}}checked{{/if}} />
         <span>{{localize "BWS.Loot.IncludeCantrips"}}</span>
       </label>
       <label class="bws-checkbox">
-        <input type="checkbox" name="includeFocus" {{checked includeFocus}} />
+        <input type="checkbox" name="includeFocus" {{#if includeFocus}}checked{{/if}} />
         <span>{{localize "BWS.Creator.IncludeFocus"}}</span>
       </label>
       <button type="button" class="bws-button bws-button-small" data-action="reroll">
@@ -129,11 +129,11 @@
 
     <div class="bws-loot-targets" role="radiogroup" aria-label="{{localize 'BWS.Loot.TargetLabel'}}">
       <label class="bws-checkbox">
-        <input type="radio" name="target" value="directory" {{checked targetIsDirectory}} />
+        <input type="radio" name="target" value="directory" {{#if targetIsDirectory}}checked{{/if}} />
         <span>{{localize "BWS.Loot.TargetFolder" folder=folderName}}</span>
       </label>
       <label class="bws-checkbox">
-        <input type="radio" name="target" value="selected" {{checked targetIsSelected}} />
+        <input type="radio" name="target" value="selected" {{#if targetIsSelected}}checked{{/if}} />
         <span>{{localize "BWS.Loot.TargetSelected" count=selectedCount}}</span>
       </label>
       {{#if targetIsSelected}}

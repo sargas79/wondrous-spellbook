@@ -43,7 +43,7 @@
   </div>
 
   <label class="bws-checkbox bws-field-focus">
-    <input type="checkbox" name="includeFocus" {{checked includeFocus}} />
+    <input type="checkbox" name="includeFocus" {{#if includeFocus}}checked{{/if}} />
     <span>{{localize "BWS.Creator.IncludeFocus"}}</span>
   </label>
 </section>
