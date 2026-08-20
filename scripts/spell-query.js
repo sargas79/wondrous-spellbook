@@ -18,6 +18,12 @@ export const TRADITIONS = Object.freeze(["arcane", "divine", "occult", "primal"]
 export const MAX_RANK = 10;
 
 /**
+ * @type {readonly number[]} Every selectable rank, cantrips (0) first.
+ * Shared by the query filter and the creator's rank chips so both agree on the range.
+ */
+export const RANKS = Object.freeze(Array.from({ length: MAX_RANK + 1 }, (_, i) => i));
+
+/**
  * Cached compendium read. Building this is expensive (it loads every spell document
  * in every pack), so it is done once and reused for all subsequent filtering.
  * @type {{ spells: object[], packCount: number } | null}
@@ -243,14 +249,25 @@ export async function loadAllSpells({ force = false } = {}) {
  * @param {string} [options.tradition="all"] One of `all`, `arcane`, `divine`, `occult`, `primal`.
  * @param {boolean} [options.includeFocus=false] Include focus spells in the results.
  * @param {string} [options.search=""] Case-insensitive match against name and traits.
+ * @param {number[]|null} [options.ranks=null] Ranks to keep, 0 for cantrips. Empty or null
+ *   means every rank, so callers that do not care about rank can omit it entirely.
  * @returns {Promise<{ groups: object[], shown: number, indexed: number, packCount: number }>}
  *   `groups` is sorted by rank ascending, each with its own name-sorted `spells` array.
  */
-export async function querySpells({ tradition = "all", includeFocus = false, search = "" } = {}) {
+export async function querySpells({
+  tradition = "all",
+  includeFocus = false,
+  search = "",
+  ranks = null
+} = {}) {
   const { spells, packCount } = await loadAllSpells();
   const needle = search.trim().toLowerCase();
+  // Built once rather than per-spell: the predicate below runs over every indexed spell.
+  const rankSet = Array.isArray(ranks) && ranks.length ? new Set(ranks.map(Number)) : null;
 
   const filtered = spells.filter((spell) => {
+    // Cheapest discriminator first; `normaliseSpell` already folds cantrips down to rank 0.
+    if (rankSet && !rankSet.has(spell.rank)) return false;
     if (!includeFocus && spell.isFocus) return false;
     if (tradition !== "all" && !spell.traditions.includes(tradition)) return false;
     if (needle && !spell.searchKey.includes(needle)) return false;

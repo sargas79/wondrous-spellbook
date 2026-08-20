@@ -28,6 +28,20 @@
     </div>
   </div>
 
+  {{!-- Ranks are independent toggles, not a radio group, so each chip owns its own
+        aria-pressed rather than the group tracking one selection. --}}
+  <div class="bws-field bws-field-rank">
+    <span class="bws-field-label">{{localize "BWS.Creator.RankLabel"}}</span>
+    <div class="bws-chips" role="group" aria-label="{{localize 'BWS.Creator.RankLabel'}}">
+      {{#each rankOptions}}
+        <button type="button" class="bws-chip{{#if active}} is-active{{/if}}"
+                data-action="setRank" data-rank="{{key}}"
+                data-tooltip="{{title}}" aria-label="{{aria}}"
+                aria-pressed="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>
+      {{/each}}
+    </div>
+  </div>
+
   <label class="bws-checkbox bws-field-focus">
     <input type="checkbox" name="includeFocus" {{checked includeFocus}} />
     <span>{{localize "BWS.Creator.IncludeFocus"}}</span>
