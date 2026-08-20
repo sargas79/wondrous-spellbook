@@ -59,7 +59,9 @@ export class MySpellbooksApp extends HandlebarsApplicationMixin(ApplicationV2) {
       editHint: game.i18n.localize("BWS.Browser.OpenItem"),
       deleteHint: game.i18n.localize("BWS.Browser.DeleteLoot")
     }));
-    const books = [...journals, ...loot];
+    // One alphabetical list rather than two blocks: the loot tag on a row is what tells
+    // the two kinds apart, so grouping by kind would only cost the reader the ordering.
+    const books = [...journals, ...loot].sort((a, b) => a.name.localeCompare(b.name));
 
     return {
       ...(await super._prepareContext(options)),
@@ -87,7 +89,10 @@ export class MySpellbooksApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Open the underlying journal entry, or a loot book's reader. */
   static async #onOpen(event, target) {
     if (target.dataset.kind === "loot") {
-      openLootBook(game.items.get(target.dataset.id));
+      // Guarded rather than passed straight in: a row left over from a book deleted
+      // elsewhere would otherwise be reported as "not a loot book".
+      const item = game.items.get(target.dataset.id);
+      if (item) openLootBook(item);
       return;
     }
     const journal = game.journal.get(target.dataset.id);
