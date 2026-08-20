@@ -1,11 +1,14 @@
 /**
  * Blizzard's Wondrous Spellbook - module entry point.
  *
- * Registers settings and hooks at `init`, then wires up the sidebar button, the PF2e
+ * Registers settings and hooks at `init`, then wires up the scene control button, the PF2e
  * character sheet integration and the spell-cast animation listeners at `ready`.
  */
 
 import { MODULE_ID, SETTINGS, DEFAULT_FOLDER_NAME } from "./constants.js";
+
+/** Name of the scene control tool that opens the spellbook browser. */
+const TOOL_NAME = "bws-spellbook";
 import { SpellbookApp } from "./spellbook-app.js";
 import { MySpellbooksApp, registerBrowserRefreshHooks } from "./my-spellbooks-app.js";
 import { injectSheetControls, openSendToSlotDialog, resolveTargetActor } from "./slot-manager.js";
@@ -34,7 +37,7 @@ function registerSettings() {
     config: true,
     type: Boolean,
     default: true,
-    onChange: () => ui.sidebar?.render()
+    onChange: () => ui.controls?.render()
   });
 
   game.settings.register(MODULE_ID, SETTINGS.FOLDER_NAME, {
@@ -48,18 +51,19 @@ function registerSettings() {
 }
 
 /**
- * Add the spellbook button to the bottom of the sidebar's control column.
+ * Add the spellbook button to the scene controls toolbar.
  *
- * The button is appended to the existing tab strip so it inherits Foundry's own
- * sizing and hover treatment. Selectors are tried in order to tolerate markup
- * changes between Foundry builds.
+ * The tool is appended to the journal notes control group so it sits with the
+ * other left-hand map tools, falling back to the token group when a build does
+ * not expose a notes group. Both the v13 record shape and the older array shape
+ * of the hook payload are handled so the button survives Foundry version
+ * differences.
  *
- * @param {object} sidebar The Sidebar application.
- * @param {HTMLElement|object} html The sidebar's root element.
+ * @param {object|Array} controls The scene control definitions being assembled.
  * @returns {void}
  */
-function injectSidebarButton(sidebar, html) {
-  // The sidebar can render before this module's settings exist in a partially
+function injectSceneControlButton(controls) {
+  // Controls can be built before this module's settings exist in a partially
   // initialised world; treat a missing setting as "enabled".
   try {
     if (!game.settings.get(MODULE_ID, SETTINGS.SIDEBAR_BUTTON)) return;
@@ -67,26 +71,30 @@ function injectSidebarButton(sidebar, html) {
     /* settings not registered yet - fall through and render the button */
   }
 
-  const root = html instanceof HTMLElement ? html : html?.[0];
-  if (!root) return;
+  const open = () => new MySpellbooksApp().render(true);
+  const tool = {
+    name: TOOL_NAME,
+    title: "BWS.ModuleTitle",
+    icon: "fa-solid fa-book-open",
+    visible: true,
+    button: true,
+    order: 100,
+    // v13 dispatches tool activation through `onChange`; v12 and earlier use
+    // `onClick`. Only one of the two is ever called, so both point at `open`.
+    onClick: open,
+    onChange: open
+  };
 
-  const tabs =
-    root.querySelector("#sidebar-tabs") ??
-    root.querySelector("menu.tabs") ??
-    root.querySelector(".sidebar-tabs");
-  if (!tabs || tabs.querySelector(".bws-sidebar-button")) return;
+  const group = Array.isArray(controls)
+    ? controls.find((c) => c.name === "notes") ?? controls.find((c) => c.name === "token")
+    : controls?.notes ?? controls?.tokens ?? controls?.token;
+  if (!group?.tools) return;
 
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "bws-sidebar-button ui-control icon fa-solid fa-book-open";
-  button.dataset.tooltip = game.i18n.localize("BWS.ModuleTitle");
-  button.setAttribute("aria-label", game.i18n.localize("BWS.ModuleTitle"));
-  button.addEventListener("click", (event) => {
-    event.preventDefault();
-    new MySpellbooksApp().render(true);
-  });
-
-  tabs.appendChild(button);
+  if (Array.isArray(group.tools)) {
+    if (!group.tools.some((t) => t.name === TOOL_NAME)) group.tools.push(tool);
+  } else {
+    group.tools[TOOL_NAME] ??= tool;
+  }
 }
 
 Hooks.once("init", () => {
@@ -132,7 +140,7 @@ Hooks.once("ready", () => {
   console.log(`${MODULE_ID} | Ready`);
 });
 
-Hooks.on("renderSidebar", injectSidebarButton);
+Hooks.on("getSceneControlButtons", injectSceneControlButton);
 
 // PF2e's character sheet render hook. Availability of JB2A/Sequencer is re-checked
 // inside the handler on every render, so toggling either module mid-session takes
