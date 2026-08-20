@@ -16,7 +16,22 @@ import { MODULE_ID } from "./constants.js";
 export const ANIMATION_FLAG = "jb2aAnimation";
 
 /**
- * Are JB2A and Sequencer both installed and active right now?
+ * Module ids of the JB2A libraries we can read effects from, most complete first.
+ * JB2A is never declared as a dependency, so Foundry never offers to install it;
+ * we only light up the animation features if the user already has one installed.
+ */
+const JB2A_MODULE_IDS = ["jb2a_patreon", "JB2A_DnD5e"];
+
+/**
+ * Is a JB2A library active, and which one?
+ * @returns {string|null} The active module's id, or null when none is present.
+ */
+export function getActiveAnimationLibrary() {
+  return JB2A_MODULE_IDS.find((id) => game.modules.get(id)?.active) ?? null;
+}
+
+/**
+ * Are a JB2A library and Sequencer both installed and active right now?
  *
  * Deliberately not memoised: a GM can enable either module mid-session and the
  * controls must appear on the next render without a reload.
@@ -24,10 +39,8 @@ export const ANIMATION_FLAG = "jb2aAnimation";
  * @returns {boolean} True when animation features can be used.
  */
 export function getAnimationsAvailable() {
-  const jb2aActive =
-    game.modules.get("JB2A_DnD5e")?.active || game.modules.get("jb2a_patreon")?.active;
   const sequencerActive = game.modules.get("sequencer")?.active;
-  return !!(jb2aActive && sequencerActive);
+  return !!(getActiveAnimationLibrary() && sequencerActive);
 }
 
 /**
