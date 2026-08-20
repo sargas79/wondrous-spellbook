@@ -95,9 +95,13 @@ export class SpellbookApp extends HandlebarsApplicationMixin(ApplicationV2) {
     });
 
     // Mark rows that are already in the book so the checkbox renders ticked.
-    for (const group of query.groups) {
-      for (const spell of group.spells) spell.selected = this.selected.has(spell.uuid);
-    }
+    // `querySpells` hands back references into the shared compendium cache, so the
+    // `selected` flag goes onto a shallow clone: mutating the cached record would
+    // leak this window's selection into every other Spellbook Creator window.
+    const groups = query.groups.map((group) => ({
+      ...group,
+      spells: group.spells.map((spell) => ({ ...spell, selected: this.selected.has(spell.uuid) }))
+    }));
 
     const selected = [...this.selected.values()]
       .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name))
@@ -111,14 +115,14 @@ export class SpellbookApp extends HandlebarsApplicationMixin(ApplicationV2) {
         { key: "all", label: game.i18n.localize("BWS.Tradition.All"), active: this.tradition === "all" },
         ...TRADITIONS.map((key) => ({
           key,
-          label: game.i18n.localize(`BWS.Tradition.${key.capitalize()}`),
+          label: game.i18n.localize(`BWS.Tradition.${key.charAt(0).toUpperCase()}${key.slice(1)}`),
           active: this.tradition === key
         }))
       ],
       includeFocus: this.includeFocus,
       search: this.search,
-      groups: query.groups,
-      hasResults: query.groups.length > 0,
+      groups,
+      hasResults: groups.length > 0,
       selected,
       selectedCount: selected.length,
       selectedCountLabel:

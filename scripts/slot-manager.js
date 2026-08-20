@@ -185,6 +185,14 @@ export async function openSendToSlotDialog({ uuid, actor } = {}) {
     source = target.source;
   }
 
+  // `resolveTargetActor` only ever returns owned actors, but an explicit actor from a
+  // macro or the module API has had no such check. Fail here rather than opening a
+  // dialog whose submit is guaranteed to be rejected by the server.
+  if (!actor.isOwner) {
+    ui.notifications.warn(game.i18n.format("BWS.Slot.NotOwner", { actor: actor.name }));
+    return null;
+  }
+
   const entries = actor.itemTypes.spellcastingEntry ?? [];
 
   // No-entries state: explain rather than offering an empty dropdown.

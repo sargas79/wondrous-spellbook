@@ -81,8 +81,15 @@ function renderSpellsPage(spells) {
       const rows = list
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((spell) => {
-          const traditions = (spell.traditions ?? []).join(", ");
-          return `<tr><td>@UUID[${spell.uuid}]{${spell.name}}</td><td>${traditions}</td></tr>`;
+          // Spell names and traits come from world and pack content, which may contain
+          // markup. This HTML is persisted into a JournalEntry page and rendered later,
+          // so everything interpolated here is escaped first.
+          const traditions = foundry.utils.escapeHTML((spell.traditions ?? []).join(", "));
+          const uuid = foundry.utils.escapeHTML(spell.uuid ?? "");
+          // The enricher delimits its label with braces, so strip those from the name
+          // before escaping or a stray brace truncates the link.
+          const label = foundry.utils.escapeHTML(String(spell.name ?? "").replace(/[{}]/g, ""));
+          return `<tr><td>@UUID[${uuid}]{${label}}</td><td>${traditions}</td></tr>`;
         })
         .join("");
       return `<h2>${getRankLabel(rank)}</h2>

@@ -73,6 +73,7 @@
   "BWS.Slot.Cancel": "Cancel",
   "BWS.Slot.Heightened": "Heightened from rank {base}",
   "BWS.Slot.NoActor": "Select a token or assign a character before sending a spell to a slot.",
+  "BWS.Slot.NotOwner": "You do not have ownership of {actor}, so spells cannot be sent to them.",
   "BWS.Slot.NoEntriesTitle": "No spellcasting entries",
   "BWS.Slot.NoEntries": "{actor} has no spellcasting entries. Add one on the character sheet first.",
   "BWS.Slot.NoFreeSlot": "No free rank {rank} slot on {entry}. The spell was added to the entry but not prepared.",
