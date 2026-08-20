@@ -92,14 +92,48 @@ export function getSpellRarity(spell) {
 
 /**
  * Slugify a free-text source title into a stable key.
+ *
+ * Letters and digits are kept in any script: a Latin-only pattern would collapse a
+ * Japanese or Cyrillic publication title to an empty string, and every such source
+ * would then share one key in the picker. Diacritics are folded so "Sombras del
+ * Espejo" and "Sombrás del Espejo" do not split into two entries.
+ *
  * @param {string} value
  * @returns {string} Lower-cased, dash-separated key.
  */
 function slugify(value) {
   return String(value)
+    .normalize("NFKD")
+    // Combining marks left behind by the decomposition above.
+    .replace(/\p{M}+/gu, "")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Stable picker key for a source title.
+ *
+ * A title made entirely of punctuation still slugifies to nothing, so those fall back
+ * to a hash of the title rather than a shared literal: two such sources must not
+ * collapse into one row of the picker.
+ *
+ * @param {string} label A source title.
+ * @returns {string}
+ */
+function sourceKey(label) {
+  const slug = slugify(label);
+  if (slug) return slug;
+
+  const title = String(label).trim();
+  if (!title) return "unknown";
+
+  let hash = 2166136261;
+  for (let i = 0; i < title.length; i++) {
+    hash ^= title.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `source-${(hash >>> 0).toString(36)}`;
 }
 
 /**
@@ -226,7 +260,7 @@ function normaliseSpell(spell, pack) {
     packLabel,
     // Which book the spell was printed in, so the loot generator can be pointed at
     // just the sources a table actually owns.
-    sourceKey: slugify(sourceLabel) || "unknown",
+    sourceKey: sourceKey(sourceLabel),
     sourceLabel,
     name: spell.name,
     img: spell.img,
