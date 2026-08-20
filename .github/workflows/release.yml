@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Derive version from tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Stamp manifest with release version and URLs
+        run: |
+          jq --arg v "${{ steps.version.outputs.version }}" \
+             --arg m "https://github.com/${{ github.repository }}/releases/latest/download/module.json" \
+             --arg d "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/module.zip" \
+             '.version = $v | .manifest = $m | .download = $d' \
+             module.json > module.stamped.json
+          mv module.stamped.json module.json
+          cat module.json
+
+      - name: Build module.zip
+        run: |
+          zip -r module.zip \
+            module.json \
+            LICENSE \
+            README.md \
+            lang \
+            scripts \
+            styles \
+            templates
+
+      - name: Attach assets to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.ref_name }}" module.json module.zip --clobber
