@@ -34,10 +34,14 @@ in this module's windows.
 | **Foundry VTT** | v14 (verified against build 366) |
 | **Game system** | Pathfinder Second Edition (verified against 8.4.1) |
 | **Sequencer** | Optional |
-| **JB2A** (`JB2A_DnD5e` or `jb2a_patreon`) | Optional |
+| **JB2A** (`jb2a_patreon`, or the free `JB2A_DnD5e`) | Optional, never installed for you |
 
 Sequencer and JB2A are **soft dependencies**. Without them the module works normally and every
 animation control is simply not rendered — no warnings, no broken buttons.
+
+JB2A is deliberately **not** declared in the manifest's `relationships`, so Foundry never offers
+to install it alongside this module. If you already own the Patreon library it is used; the free
+library is used only when it is the sole one installed.
 
 ---
 

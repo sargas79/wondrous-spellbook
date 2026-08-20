@@ -40,17 +40,7 @@
       {
         "id": "sequencer",
         "type": "module",
-        "reason": "Required to play JB2A animations when a spell is cast. The module works without it; animation controls simply do not appear."
-      },
-      {
-        "id": "JB2A_DnD5e",
-        "type": "module",
-        "reason": "Provides the free JB2A animation library. Optional - animation controls are hidden when absent."
-      },
-      {
-        "id": "jb2a_patreon",
-        "type": "module",
-        "reason": "Provides the full JB2A animation library. Optional - animation controls are hidden when absent."
+        "reason": "Required to play spell animations. The module works without it; animation controls simply do not appear."
       }
     ]
   },
