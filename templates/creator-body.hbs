@@ -12,7 +12,7 @@
         {{#each spells}}
           <div class="bws-spell-row{{#if selected}} is-selected{{/if}}" role="listitem">
             <label class="bws-row-check">
-              <input type="checkbox" data-uuid="{{uuid}}" {{checked selected}}
+              <input type="checkbox" data-uuid="{{uuid}}" {{#if selected}}checked{{/if}}
                      {{#if ../../readOnly}}disabled{{/if}}
                      aria-label="{{name}}" />
             </label>

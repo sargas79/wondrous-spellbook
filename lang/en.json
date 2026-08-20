@@ -130,10 +130,10 @@
   "BWS.Error.AnimSaveFailed": "Failed to save the animation path.",
   "BWS.Error.AnimPlayFailed": "Failed to play the spell animation.",
 
-  "BWS.Loot.Title": "Loot Spellbook Generator",
+  "BWS.Loot.Title": "Spellbook Generator",
   "BWS.Loot.ReaderTitle": "Spellbook",
-  "BWS.Loot.RollButton": "Roll loot",
-  "BWS.Loot.RollTooltip": "Roll a random spellbook to use as treasure",
+  "BWS.Loot.RollButton": "Generate spellbook",
+  "BWS.Loot.RollTooltip": "Generate a random spellbook for a chosen tradition",
   "BWS.Loot.LevelLabel": "Level",
   "BWS.Loot.MaxRankHint": "up to rank {rank}",
   "BWS.Loot.TraditionLabel": "Tradition",
