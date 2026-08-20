@@ -10,8 +10,8 @@
  * genuinely different book.
  */
 
-import { template } from "./constants.js";
-import { RARITIES, TRADITIONS, getRankBadge, getRankLabel } from "./spell-query.js";
+import { MODULE_ID, SETTINGS, template } from "./constants.js";
+import { RARITIES, TRADITIONS, getRankBadge, getRankLabel, listSpellSources } from "./spell-query.js";
 import {
   MAX_LEVEL,
   PROFILES,
@@ -54,6 +54,12 @@ export class LootGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     this.includeCantrips = true;
     /** @type {boolean} */
     this.includeFocus = false;
+    /**
+     * Source keys the roll may draw from. An empty list means every source, which is
+     * also what an empty saved setting means.
+     * @type {string[]}
+     */
+    this.sources = LootGeneratorApp.#readSavedSources();
     /** @type {string} */
     this.seed = options.seed ?? randomSeed();
     /** @type {"directory"|"selected"} */
@@ -81,6 +87,7 @@ export class LootGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     actions: {
       reroll: LootGeneratorApp.#onReroll,
       newSeed: LootGeneratorApp.#onNewSeed,
+      pickSources: LootGeneratorApp.#onPickSources,
       rerollSpell: LootGeneratorApp.#onRerollSpell,
       removeSpell: LootGeneratorApp.#onRemoveSpell,
       create: LootGeneratorApp.#onCreate,
@@ -135,6 +142,9 @@ export class LootGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
         selected: key === this.maxRarity
       })),
       count: this.count ?? "",
+      sourceLabel: this.sources.length
+        ? game.i18n.format("BWS.Loot.SourcesSome", { count: this.sources.length })
+        : game.i18n.localize("BWS.Loot.SourcesAll"),
       includeCantrips: this.includeCantrips,
       includeFocus: this.includeFocus,
       seed: this.seed,
@@ -179,6 +189,7 @@ export class LootGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
         includeCantrips: this.includeCantrips,
         includeFocus: this.includeFocus,
         maxRarity: this.maxRarity,
+        sources: this.sources,
         seed: this.seed
       });
       this.result = result;
@@ -269,6 +280,107 @@ export class LootGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     this.seed = randomSeed();
     await this.#roll();
     await this.render();
+  }
+
+  /**
+   * Read the saved source selection, tolerating a world where the setting has not been
+   * registered yet (a partially initialised module, or a macro run at `init`).
+   * @returns {string[]}
+   */
+  static #readSavedSources() {
+    try {
+      const saved = game.settings.get(MODULE_ID, SETTINGS.LOOT_SOURCES);
+      return Array.isArray(saved) ? saved.map(String) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Pick which books the roll may draw from.
+   *
+   * The list is built from the compendiums this world actually has, so it names the
+   * GM's own shelf rather than a hard-coded set of Paizo products. Ticking everything
+   * is stored as "no restriction", which keeps a later-installed compendium usable
+   * without reopening this dialog.
+   */
+  static async #onPickSources() {
+    const sources = await listSpellSources();
+    if (!sources.length) {
+      ui.notifications.warn(game.i18n.localize("BWS.Loot.NoSources"));
+      return;
+    }
+
+    const selected = new Set(this.sources);
+    const content = await foundry.applications.handlebars.renderTemplate(template("loot-sources.hbs"), {
+      sources: sources.map((source) => ({
+        ...source,
+        // Nothing selected means everything is in play, so the boxes start ticked.
+        checked: !selected.size || selected.has(source.key)
+      })),
+      total: sources.length
+    });
+
+    let picked = null;
+    await foundry.applications.api.DialogV2.wait({
+      window: { title: game.i18n.localize("BWS.Loot.SourcesTitle"), icon: "fa-solid fa-book-open" },
+      classes: ["bws-dialog", "bws-sources-dialog"],
+      content,
+      position: { width: 420 },
+      buttons: [
+        {
+          action: "apply",
+          label: game.i18n.localize("BWS.Loot.SourcesApply"),
+          icon: "fa-solid fa-check",
+          default: true,
+          callback: (_event, _button, dialog) => {
+            picked = [...dialog.element.querySelectorAll("[name='source']")]
+              .filter((box) => box.checked)
+              .map((box) => box.value);
+          }
+        },
+        { action: "cancel", label: game.i18n.localize("BWS.Creator.Cancel"), icon: "fa-solid fa-xmark" }
+      ],
+      render: (_event, dialog) => {
+        const boxes = () => dialog.element.querySelectorAll("[name='source']");
+        dialog.element.querySelector("[data-bulk='all']")?.addEventListener("click", () => {
+          for (const box of boxes()) box.checked = true;
+        });
+        dialog.element.querySelector("[data-bulk='none']")?.addEventListener("click", () => {
+          for (const box of boxes()) box.checked = false;
+        });
+      },
+      rejectClose: false,
+      modal: true
+    });
+
+    if (picked === null) return;
+
+    if (!picked.length) {
+      ui.notifications.warn(game.i18n.localize("BWS.Loot.NoSourcePicked"));
+      return;
+    }
+
+    // A full tick-list is stored as "everything", so compendiums added later are
+    // included automatically instead of silently sitting outside the saved list.
+    this.sources = picked.length === sources.length ? [] : picked;
+    await LootGeneratorApp.#saveSources(this.sources);
+    await this.#roll({ keepName: true });
+    await this.render();
+  }
+
+  /**
+   * Persist the source selection for the next book.
+   * @param {string[]} sources
+   * @returns {Promise<void>}
+   */
+  static async #saveSources(sources) {
+    if (!game.user?.isGM) return;
+    try {
+      await game.settings.set(MODULE_ID, SETTINGS.LOOT_SOURCES, sources);
+    } catch (err) {
+      console.warn("Blizzard's Wondrous Spellbook | Could not store the loot source list", err);
+    }
   }
 
   /** Swap one page for another of the same rank. */

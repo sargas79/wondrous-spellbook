@@ -115,6 +115,9 @@ export function toStoredSpell(spell) {
     img: spell.img,
     rank: spell.rank,
     traditions: spell.traditions ?? [],
+    // Kept so the reader can show a page's rarity without re-reading the compendiums.
+    // Books written before this existed simply have no rarity pill.
+    ...(spell.rarity ? { rarity: spell.rarity } : {}),
     // Preserved verbatim if it was ever set, even while JB2A is disabled.
     ...(spell.jb2aAnimation ? { jb2aAnimation: spell.jb2aAnimation } : {})
   };

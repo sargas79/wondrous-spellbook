@@ -20,11 +20,14 @@
           <div class="bws-spell-row{{#if alreadyLearned}} is-learned{{/if}}">
             <span class="bws-rank-badge">{{rankBadge}}</span>
             <span class="bws-spell-name" title="{{name}}">{{name}}</span>
-            {{#if learnedBy}}
-              <span class="bws-learned-tag" title="{{learnedBy}}">
-                <i class="fa-solid fa-check"></i> {{learnedBy}}
-              </span>
-            {{/if}}
+            {{!-- Always rendered, empty tag included, so the grid columns line up
+                  whether or not anyone has learned the spell yet. --}}
+            <span class="bws-spell-tags">
+              {{#if rarityLabel}}<span class="bws-pill bws-pill-rarity-{{rarity}}">{{rarityLabel}}</span>{{/if}}
+            </span>
+            <span class="bws-learned-tag" title="{{learnedBy}}">
+              {{#if learnedBy}}<i class="fa-solid fa-check"></i> {{learnedBy}}{{/if}}
+            </span>
             <button type="button" class="bws-icon-button bws-learn" data-action="learn" data-uuid="{{uuid}}"
                     data-tooltip="{{localize 'BWS.Loot.Learn'}}"
                     aria-label="{{localize 'BWS.Loot.Learn'}}"

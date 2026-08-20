@@ -64,6 +64,10 @@
         <input type="checkbox" name="includeFocus" {{checked includeFocus}} />
         <span>{{localize "BWS.Creator.IncludeFocus"}}</span>
       </label>
+      <button type="button" class="bws-button bws-button-small" data-action="pickSources"
+              data-tooltip="{{localize 'BWS.Loot.SourcesTooltip'}}">
+        <i class="fa-solid fa-book-open"></i> {{sourceLabel}}
+      </button>
       <button type="button" class="bws-button bws-button-small" data-action="reroll">
         <i class="fa-solid fa-rotate"></i> {{localize "BWS.Loot.Reroll"}}
       </button>
@@ -96,6 +100,7 @@
             <span class="bws-rank-badge">{{rankBadge}}</span>
             <span class="bws-spell-name" title="{{name}}">{{name}}</span>
             <span class="bws-traditions">
+              <span class="bws-pill bws-pill-rarity-{{rarity}}" title="{{sourceLabel}}">{{rarityLabel}}</span>
               {{#each traditionTags}}<span class="bws-pill bws-pill-{{key}}">{{label}}</span>{{/each}}
             </span>
             <button type="button" class="bws-icon-button" data-action="rerollSpell" data-uuid="{{uuid}}"

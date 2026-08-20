@@ -13,7 +13,7 @@ import { SpellbookApp } from "./spellbook-app.js";
 import { MySpellbooksApp, registerBrowserRefreshHooks } from "./my-spellbooks-app.js";
 import { injectSheetControls, openSendToSlotDialog, resolveTargetActor } from "./slot-manager.js";
 import { getAnimationsAvailable, registerAnimationHooks } from "./animation-config.js";
-import { invalidateSpellCache, querySpells } from "./spell-query.js";
+import { invalidateSpellCache, listSpellSources, querySpells } from "./spell-query.js";
 import { LootGeneratorApp } from "./loot-generator-app.js";
 import {
   injectLootBookButton,
@@ -91,6 +91,15 @@ function registerSettings() {
       rare: "BWS.Loot.Rarity.rare"
     },
     default: "common"
+  });
+
+  // Hidden: the source list is edited through the loot generator's own picker, which
+  // knows which compendiums the world actually has. Stored so the choice sticks.
+  game.settings.register(MODULE_ID, SETTINGS.LOOT_SOURCES, {
+    scope: "world",
+    config: false,
+    type: Array,
+    default: []
   });
 
   game.settings.register(MODULE_ID, SETTINGS.TRACK_LEARNED, {
@@ -172,6 +181,7 @@ Hooks.once("init", () => {
     resolveTargetActor,
     getAnimationsAvailable,
     querySpells,
+    listSpellSources,
     invalidateSpellCache,
     LootGeneratorApp,
     openLootGenerator: (options = {}) => new LootGeneratorApp(options).render(true),

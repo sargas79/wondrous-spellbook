@@ -91,6 +91,35 @@ export function getSpellRarity(spell) {
 }
 
 /**
+ * Slugify a free-text source title into a stable key.
+ * @param {string} value
+ * @returns {string} Lower-cased, dash-separated key.
+ */
+function slugify(value) {
+  return String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/**
+ * Read the book a spell was published in.
+ *
+ * PF2e moved this from `system.source.value` to `system.publication.title`; both are
+ * read so the label survives either data model. Third-party and homebrew packs often
+ * leave it empty, so callers pass the compendium's own label as the fallback.
+ *
+ * @param {object} spell A SpellPF2e document or raw spell source.
+ * @param {string} [fallback=""] Used when the spell carries no publication title.
+ * @returns {string} A human-readable source title.
+ */
+export function getSpellSource(spell, fallback = "") {
+  const raw = spell?.system?.publication?.title ?? spell?.system?.source?.value ?? "";
+  const title = String(raw).trim();
+  return title || fallback;
+}
+
+/**
  * Read a spell's category slug (`spell`, `focus`, `ritual`, ...).
  * @param {object} spell A SpellPF2e document or raw spell source.
  * @returns {string} Lower-cased category slug, or an empty string.
@@ -169,18 +198,36 @@ export function getRankBadge(rank) {
 }
 
 /**
+ * Localised rarity name, shared by the rarity pills and the ceiling dropdown.
+ * @param {string} rarity One of common/uncommon/rare/unique.
+ * @returns {string}
+ */
+export function getRarityLabel(rarity) {
+  const key = RARITIES.includes(rarity) ? rarity : "common";
+  return game.i18n.localize(`BWS.Loot.Rarity.${key}`);
+}
+
+/**
  * Reduce a spell document to the flat shape the templates and journal flags use.
  * @param {object} spell A SpellPF2e document.
- * @param {string} packId The compendium collection id the spell came from.
+ * @param {object} pack The compendium collection the spell came from.
  * @returns {object} Normalised spell record.
  */
-function normaliseSpell(spell, packId) {
+function normaliseSpell(spell, pack) {
   const rank = isCantrip(spell) ? 0 : getSpellRank(spell);
   const traditions = getSpellTraditions(spell);
+  const rarity = getSpellRarity(spell);
+  const packLabel = pack?.metadata?.label ?? pack?.title ?? pack?.collection ?? "";
+  const sourceLabel = getSpellSource(spell, packLabel);
   return {
     uuid: spell.uuid,
     id: spell.id,
-    packId,
+    packId: pack?.collection ?? "",
+    packLabel,
+    // Which book the spell was printed in, so the loot generator can be pointed at
+    // just the sources a table actually owns.
+    sourceKey: slugify(sourceLabel) || "unknown",
+    sourceLabel,
     name: spell.name,
     img: spell.img,
     rank,
@@ -194,7 +241,9 @@ function normaliseSpell(spell, packId) {
     })),
     traits: getSpellTraits(spell),
     category: getSpellCategory(spell),
-    rarity: getSpellRarity(spell),
+    rarity,
+    // Pre-localised for the row pill, like `traditionTags` above.
+    rarityLabel: getRarityLabel(rarity),
     isFocus: isFocusSpell(spell),
     isRitual: isRitual(spell),
     isCantrip: rank === 0,
@@ -224,7 +273,7 @@ export async function loadAllSpells({ force = false } = {}) {
         packs.map(async (pack) => {
           try {
             const docs = await pack.getDocuments({ type: "spell" });
-            return docs.map((doc) => normaliseSpell(doc, pack.collection));
+            return docs.map((doc) => normaliseSpell(doc, pack));
           } catch (err) {
             // One unreadable pack must not sink the whole query.
             console.warn(`Blizzard's Wondrous Spellbook | Skipped pack ${pack.collection}`, err);
@@ -258,6 +307,27 @@ export async function loadAllSpells({ force = false } = {}) {
   })();
 
   return _loading;
+}
+
+/**
+ * Every publication a spell in the world's compendiums came from.
+ *
+ * Sorted by label so the picker reads like a shelf, with the count each source
+ * contributes so a GM can see at a glance which ones matter.
+ *
+ * @returns {Promise<{ key: string, label: string, count: number }[]>}
+ */
+export async function listSpellSources() {
+  const { spells } = await loadAllSpells();
+
+  const sources = new Map();
+  for (const spell of spells) {
+    const entry = sources.get(spell.sourceKey);
+    if (entry) entry.count++;
+    else sources.set(spell.sourceKey, { key: spell.sourceKey, label: spell.sourceLabel, count: 1 });
+  }
+
+  return [...sources.values()].sort((a, b) => a.label.localeCompare(b.label));
 }
 
 /**
