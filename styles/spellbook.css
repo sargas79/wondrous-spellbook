@@ -84,7 +84,8 @@
   grid-template-columns: minmax(180px, 1fr) auto minmax(160px, 1fr);
   grid-template-areas:
     "name tradition search"
-    "name tradition focus";
+    "name tradition focus"
+    "rank rank      rank";
   align-items: end;
   gap: 8px 16px;
   padding: 12px 14px;
@@ -97,6 +98,7 @@
 .bws-field-tradition { grid-area: tradition; }
 .bws-field-search { grid-area: search; }
 .bws-field-focus { grid-area: focus; }
+.bws-field-rank { grid-area: rank; }
 
 .bws-field {
   display: flex;
@@ -167,6 +169,45 @@
   background: var(--bws-accent-bg);
   color: var(--bws-text);
   box-shadow: inset 0 0 0 1px var(--bws-accent-border);
+}
+
+/* Rank chips: multi-select, so they are separate pills rather than a joined
+   segmented control. Twelve of them do not fit one line at the default width. */
+
+.bws-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.bws-chip {
+  appearance: none;
+  background: var(--bws-bg-inset);
+  border: 1px solid var(--bws-border);
+  border-radius: var(--bws-radius-sm);
+  color: var(--bws-text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  height: 24px;
+  line-height: 1;
+  min-width: 30px;
+  padding: 0 8px;
+  text-align: center;
+  transition: background 120ms ease, color 120ms ease;
+  /* Shift-click spans a range, and without this it also drags a text selection. */
+  user-select: none;
+  white-space: nowrap;
+}
+
+.bws-chip:hover {
+  background: var(--bws-row-hover);
+  color: var(--bws-text);
+}
+
+.bws-chip.is-active {
+  background: var(--bws-accent-bg);
+  border-color: var(--bws-accent-border);
+  color: var(--bws-text);
 }
 
 .bws-checkbox {

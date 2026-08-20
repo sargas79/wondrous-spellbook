@@ -12,7 +12,7 @@
  */
 
 import { MODULE_ID, template } from "./constants.js";
-import { TRADITIONS, querySpells, getRankBadge } from "./spell-query.js";
+import { TRADITIONS, RANKS, querySpells, getRankBadge, getRankLabel } from "./spell-query.js";
 import { canEditSpellbook, createSpellbook, getStoredSpells, updateSpellbook } from "./persistence.js";
 import { openSendToSlotDialog } from "./slot-manager.js";
 
@@ -37,6 +37,17 @@ export class SpellbookApp extends HandlebarsApplicationMixin(ApplicationV2) {
     this.includeFocus = false;
     /** @type {string} */
     this.search = "";
+
+    /**
+     * Ranks to show, 0 for cantrips. Empty means every rank, which is why this is a
+     * Set rather than a flag per rank: "no filter" and "nothing selected" are the
+     * same state, so clearing it needs no special case.
+     * @type {Set<number>}
+     */
+    this.ranks = new Set();
+
+    /** @type {number|null} Last rank chip clicked, so shift-click can span a range. */
+    this._lastRank = null;
 
     /**
      * Selected spells, keyed by uuid. Seeded from the journal when editing so
@@ -67,6 +78,7 @@ export class SpellbookApp extends HandlebarsApplicationMixin(ApplicationV2) {
     position: { width: 900, height: 640 },
     actions: {
       setTradition: SpellbookApp.#onSetTradition,
+      setRank: SpellbookApp.#onSetRank,
       sendToSlot: SpellbookApp.#onSendToSlot,
       removeSelected: SpellbookApp.#onRemoveSelected,
       save: SpellbookApp.#onSave,
@@ -91,7 +103,8 @@ export class SpellbookApp extends HandlebarsApplicationMixin(ApplicationV2) {
     const query = await querySpells({
       tradition: this.tradition,
       includeFocus: this.includeFocus,
-      search: this.search
+      search: this.search,
+      ranks: [...this.ranks]
     });
 
     // Mark rows that are already in the book so the checkbox renders ticked.
@@ -117,6 +130,22 @@ export class SpellbookApp extends HandlebarsApplicationMixin(ApplicationV2) {
           key,
           label: game.i18n.localize(`BWS.Tradition.${key.charAt(0).toUpperCase()}${key.slice(1)}`),
           active: this.tradition === key
+        }))
+      ],
+      rankOptions: [
+        {
+          key: "all",
+          // Badges are short by design, so the chips stay compact; the full rank name
+          // rides along in the tooltip and accessible name.
+          label: game.i18n.localize("BWS.Creator.RankAll"),
+          title: game.i18n.localize("BWS.Creator.RankAllHint"),
+          active: this.ranks.size === 0
+        },
+        ...RANKS.map((rank) => ({
+          key: String(rank),
+          label: getRankBadge(rank),
+          title: getRankLabel(rank),
+          active: this.ranks.has(rank)
         }))
       ],
       includeFocus: this.includeFocus,
@@ -224,6 +253,35 @@ export class SpellbookApp extends HandlebarsApplicationMixin(ApplicationV2) {
   /** Switch the tradition filter. */
   static async #onSetTradition(event, target) {
     this.tradition = target.dataset.tradition ?? "all";
+    await this.render({ parts: ["header", "body", "footer"] });
+  }
+
+  /**
+   * Toggle a rank chip. `all` clears the set; shift-click spans from the last chip
+   * clicked, which is the natural gesture for "ranks 1 through 4".
+   */
+  static async #onSetRank(event, target) {
+    const key = target.dataset.rank ?? "all";
+
+    if (key === "all") {
+      this.ranks.clear();
+      this._lastRank = null;
+    } else {
+      const rank = Number(key);
+      if (!Number.isInteger(rank)) return;
+
+      if (event.shiftKey && this._lastRank !== null) {
+        const [from, to] = [this._lastRank, rank].sort((a, b) => a - b);
+        for (let r = from; r <= to; r++) this.ranks.add(r);
+      } else if (this.ranks.has(rank)) {
+        this.ranks.delete(rank);
+      } else {
+        this.ranks.add(rank);
+      }
+      this._lastRank = rank;
+    }
+
+    // Header for the pressed states, body for the results, footer for the status line.
     await this.render({ parts: ["header", "body", "footer"] });
   }
 
