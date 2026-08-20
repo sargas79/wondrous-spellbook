@@ -53,10 +53,11 @@ function registerSettings() {
 /**
  * Add the spellbook button to the scene controls toolbar.
  *
- * The tool is appended to the journal notes control group (or the token group for
- * users without note permissions) so it sits with the other left-hand map tools.
- * Both the v13 record shape and the older array shape of the hook payload are
- * handled so the button survives Foundry version differences.
+ * The tool is appended to the journal notes control group so it sits with the
+ * other left-hand map tools, falling back to the token group when a build does
+ * not expose a notes group. Both the v13 record shape and the older array shape
+ * of the hook payload are handled so the button survives Foundry version
+ * differences.
  *
  * @param {object|Array} controls The scene control definitions being assembled.
  * @returns {void}
@@ -78,6 +79,8 @@ function injectSceneControlButton(controls) {
     visible: true,
     button: true,
     order: 100,
+    // v13 dispatches tool activation through `onChange`; v12 and earlier use
+    // `onClick`. Only one of the two is ever called, so both point at `open`.
     onClick: open,
     onChange: open
   };
