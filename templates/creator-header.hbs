@@ -1,0 +1,35 @@
+{{!-- Filter bar: name, tradition segments, search and the focus toggle. --}}
+{{!-- Deliberately excluded from search re-renders so the input keeps focus. --}}
+<section class="bws-header">
+  <div class="bws-field bws-field-name">
+    <label for="bws-name">{{localize "BWS.Creator.NameLabel"}}</label>
+    <input id="bws-name" type="text" name="spellbookName" value="{{spellbookName}}"
+           placeholder="{{localize 'BWS.Creator.NamePlaceholder'}}" autocomplete="off"
+           {{#if readOnly}}disabled{{/if}} />
+  </div>
+
+  <div class="bws-field bws-field-tradition">
+    <span class="bws-field-label">{{localize "BWS.Creator.TraditionLabel"}}</span>
+    <div class="bws-segments" role="group" aria-label="{{localize 'BWS.Creator.TraditionLabel'}}">
+      {{#each traditions}}
+        <button type="button" class="bws-segment{{#if active}} is-active{{/if}}"
+                data-action="setTradition" data-tradition="{{key}}"
+                aria-pressed="{{#if active}}true{{else}}false{{/if}}">{{label}}</button>
+      {{/each}}
+    </div>
+  </div>
+
+  <div class="bws-field bws-field-search">
+    <label for="bws-search">{{localize "BWS.Creator.SearchLabel"}}</label>
+    <div class="bws-search-wrap">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input id="bws-search" type="search" name="search" value="{{search}}"
+             placeholder="{{localize 'BWS.Creator.SearchPlaceholder'}}" autocomplete="off" />
+    </div>
+  </div>
+
+  <label class="bws-checkbox bws-field-focus">
+    <input type="checkbox" name="includeFocus" {{checked includeFocus}} />
+    <span>{{localize "BWS.Creator.IncludeFocus"}}</span>
+  </label>
+</section>

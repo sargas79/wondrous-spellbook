@@ -1,0 +1,98 @@
+{{!-- Two columns: the compendium results on the left, the book's contents on the right. --}}
+<section class="bws-body">
+
+  <div class="bws-spell-list" role="list">
+    {{#if hasResults}}
+      {{#each groups}}
+        <div class="bws-group-header">
+          <span class="bws-group-title">{{label}}</span>
+          <span class="bws-group-count">{{countLabel}}</span>
+        </div>
+
+        {{#each spells}}
+          <div class="bws-spell-row{{#if selected}} is-selected{{/if}}" role="listitem">
+            <label class="bws-row-check">
+              <input type="checkbox" data-uuid="{{uuid}}" {{checked selected}}
+                     {{#if ../../readOnly}}disabled{{/if}}
+                     aria-label="{{name}}" />
+            </label>
+
+            <span class="bws-spell-name" title="{{name}}">{{name}}</span>
+
+            {{#if action.glyph}}
+              <span class="bws-action-cost{{#unless action.isNumeric}} is-text{{/unless}}"
+                    title="{{action.label}}">{{action.glyph}}</span>
+            {{else}}
+              <span class="bws-action-cost is-empty"></span>
+            {{/if}}
+
+            <span class="bws-traditions">
+              {{#each traditionTags}}
+                <span class="bws-pill bws-pill-{{key}}">{{label}}</span>
+              {{/each}}
+              {{#if isFocus}}<span class="bws-pill bws-pill-focus">{{localize "BWS.Rank.Focus"}}</span>{{/if}}
+            </span>
+
+            <button type="button" class="bws-send" data-action="sendToSlot" data-uuid="{{uuid}}"
+                    data-tooltip="{{localize 'BWS.Creator.SendToSlot'}}"
+                    aria-label="{{localize 'BWS.Creator.SendToSlot'}}">
+              <i class="fa-solid fa-arrow-down-to-line"></i>
+            </button>
+          </div>
+        {{/each}}
+      {{/each}}
+    {{else}}
+      <div class="bws-empty">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <p class="bws-empty-title">{{localize "BWS.Creator.NoResults"}}</p>
+        <p class="bws-empty-hint">{{localize "BWS.Creator.NoResultsHint"}}</p>
+      </div>
+    {{/if}}
+  </div>
+
+  <aside class="bws-selected">
+    <div class="bws-selected-header">
+      <span class="bws-selected-label">{{localize "BWS.Creator.Selected"}}</span>
+      <span class="bws-selected-count">{{selectedCountLabel}}</span>
+    </div>
+
+    <div class="bws-selected-list">
+      {{#if selectedCount}}
+        {{#each selected}}
+          <div class="bws-selected-row">
+            <span class="bws-rank-badge">{{rankBadge}}</span>
+            <span class="bws-selected-name" title="{{name}}">{{name}}</span>
+            {{#unless ../readOnly}}
+              <button type="button" class="bws-remove" data-action="removeSelected" data-uuid="{{uuid}}"
+                      data-tooltip="{{localize 'BWS.Creator.RemoveFromSelection'}}"
+                      aria-label="{{localize 'BWS.Creator.RemoveFromSelection'}}">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            {{/unless}}
+          </div>
+        {{/each}}
+      {{else}}
+        <p class="bws-selected-empty">{{localize "BWS.Creator.SelectedEmpty"}}</p>
+      {{/if}}
+    </div>
+
+    <div class="bws-selected-footer">
+      <p class="bws-ownership-note">
+        <i class="fa-solid fa-lock"></i>
+        {{#if readOnly}}
+          {{localize "BWS.Creator.ReadOnlyNote"}}
+        {{else}}
+          {{localize "BWS.Creator.OwnershipNote"}}
+        {{/if}}
+      </p>
+      <button type="button" class="bws-button bws-button-primary" data-action="save"
+              {{#unless canSave}}disabled{{/unless}}>
+        <i class="fa-solid fa-floppy-disk"></i> {{localize "BWS.Creator.Save"}}
+      </button>
+      <button type="button" class="bws-button" data-action="cancel">
+        {{localize "BWS.Creator.Cancel"}}
+      </button>
+    </div>
+  </aside>
+
+</section>
