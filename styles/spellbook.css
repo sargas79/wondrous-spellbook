@@ -46,9 +46,9 @@
   overflow: hidden;
 }
 
-.bws input,
+.bws input:not([type="checkbox"]):not([type="radio"]),
 .bws select,
-.bws-dialog input,
+.bws-dialog input:not([type="checkbox"]):not([type="radio"]),
 .bws-dialog select {
   background: var(--bws-bg-inset);
   border: 1px solid var(--bws-border);
@@ -60,9 +60,9 @@
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 
-.bws input:focus,
+.bws input:not([type="checkbox"]):not([type="radio"]):focus,
 .bws select:focus,
-.bws-dialog input:focus,
+.bws-dialog input:not([type="checkbox"]):not([type="radio"]):focus,
 .bws-dialog select:focus {
   border-color: var(--bws-accent);
   box-shadow: 0 0 0 2px var(--bws-accent-bg);
@@ -221,12 +221,102 @@
   white-space: nowrap;
 }
 
-.bws-checkbox input[type="checkbox"] {
-  accent-color: var(--bws-accent);
-  height: 14px;
-  width: 14px;
-  margin: 0;
+/* Checkboxes and radios are drawn from scratch. The native control picks up
+   Foundry's and PF2e's own chrome - a wide toggle track in their accent colour -
+   which does not match this palette, so `appearance: none` takes it back. The
+   selectors are two classes deep to outrank the core `.application input` rules. */
+
+.bws .bws-checkbox input[type="checkbox"],
+.bws .bws-checkbox input[type="radio"],
+.bws .bws-row-check input[type="checkbox"],
+.bws-dialog .bws-checkbox input[type="checkbox"],
+.bws-dialog .bws-checkbox input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--bws-bg-inset);
+  border: 1px solid var(--bws-border);
+  border-radius: var(--bws-radius-sm);
+  box-shadow: none;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-grid;
+  place-content: center;
   flex: 0 0 auto;
+  height: 15px;
+  width: 15px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.bws .bws-checkbox input[type="radio"],
+.bws-dialog .bws-checkbox input[type="radio"] {
+  border-radius: 50%;
+}
+
+.bws .bws-checkbox input[type="checkbox"]:hover,
+.bws .bws-checkbox input[type="radio"]:hover,
+.bws .bws-row-check input[type="checkbox"]:hover,
+.bws-dialog .bws-checkbox input[type="checkbox"]:hover,
+.bws-dialog .bws-checkbox input[type="radio"]:hover {
+  border-color: var(--bws-accent-border);
+}
+
+.bws .bws-checkbox input[type="checkbox"]:focus-visible,
+.bws .bws-checkbox input[type="radio"]:focus-visible,
+.bws .bws-row-check input[type="checkbox"]:focus-visible,
+.bws-dialog .bws-checkbox input[type="checkbox"]:focus-visible,
+.bws-dialog .bws-checkbox input[type="radio"]:focus-visible {
+  border-color: var(--bws-accent);
+  box-shadow: 0 0 0 2px var(--bws-accent-bg);
+  outline: none;
+}
+
+.bws .bws-checkbox input[type="checkbox"]:checked,
+.bws .bws-checkbox input[type="radio"]:checked,
+.bws .bws-row-check input[type="checkbox"]:checked,
+.bws-dialog .bws-checkbox input[type="checkbox"]:checked,
+.bws-dialog .bws-checkbox input[type="radio"]:checked {
+  background: var(--bws-accent);
+  border-color: var(--bws-accent);
+}
+
+/* The mark itself: a rotated corner for the tick, a dot for the radio. Both are
+   always present so only opacity animates when the control is toggled. */
+
+.bws .bws-checkbox input[type="checkbox"]::before,
+.bws .bws-row-check input[type="checkbox"]::before,
+.bws-dialog .bws-checkbox input[type="checkbox"]::before {
+  content: "";
+  height: 7px;
+  width: 3px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  margin-top: -2px;
+  opacity: 0;
+  transform: rotate(45deg);
+  transition: opacity 120ms ease;
+}
+
+.bws .bws-checkbox input[type="radio"]::before,
+.bws-dialog .bws-checkbox input[type="radio"]::before {
+  content: "";
+  height: 7px;
+  width: 7px;
+  border-radius: 50%;
+  background: #fff;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.bws .bws-checkbox input[type="checkbox"]:checked::before,
+.bws .bws-checkbox input[type="radio"]:checked::before,
+.bws .bws-row-check input[type="checkbox"]:checked::before,
+.bws-dialog .bws-checkbox input[type="checkbox"]:checked::before,
+.bws-dialog .bws-checkbox input[type="radio"]:checked::before {
+  opacity: 1;
 }
 
 /* -------------------------------------------------- *
@@ -294,14 +384,6 @@
   justify-content: center;
 }
 
-.bws-row-check input[type="checkbox"] {
-  accent-color: var(--bws-accent);
-  height: 14px;
-  width: 14px;
-  margin: 0;
-  cursor: pointer;
-}
-
 .bws-spell-name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -356,6 +438,22 @@
 .bws-pill-focus {
   color: var(--bws-accent);
   border-color: var(--bws-accent-border);
+}
+
+/* Rarity pills follow PF2e's own colour language: common stays quiet, and each step
+   up the scale gets louder, so a rare page is spotted without reading the label. */
+.bws-pill-rarity-common { color: var(--bws-text-muted); }
+.bws-pill-rarity-uncommon {
+  color: #e0b64a;
+  border-color: rgba(224, 182, 74, 0.4);
+}
+.bws-pill-rarity-rare {
+  color: #6fb1e8;
+  border-color: rgba(111, 177, 232, 0.4);
+}
+.bws-pill-rarity-unique {
+  color: #d98ae0;
+  border-color: rgba(217, 138, 224, 0.4);
 }
 
 .bws-send {
@@ -927,7 +1025,12 @@
   gap: 14px;
 }
 
-.bws-loot-toggles .bws-button { margin-left: auto; }
+/* The button group sits hard right; only the first one takes the free space, or the
+   two of them would drift apart. */
+.bws-loot-toggles .bws-button:not(:last-child) { margin-left: auto; }
+.bws-loot-toggles .bws-button:not(:last-child) ~ .bws-button { margin-left: 0; }
+
+.bws-loot-toggles .bws-button i { margin-right: 4px; }
 
 .bws-loot-result {
   padding: 6px 12px;
@@ -1045,6 +1148,18 @@
   white-space: nowrap;
 }
 
+/* Reader rows carry one cell more than the creator's: badge, name, rarity, learned-by
+   tag, learn button. The tag cell is always rendered so the button stays put. */
+.bws-loot-spells .bws-spell-row {
+  grid-template-columns: 26px minmax(120px, 1fr) auto auto 30px;
+}
+
+.bws-spell-tags {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .bws-spell-row.is-learned .bws-spell-name { color: var(--bws-text-muted); }
 
 .bws-learn:not(:disabled) { color: var(--bws-accent); }
@@ -1053,4 +1168,63 @@
   border-top: 1px solid var(--bws-border);
   padding: 8px 12px;
   flex: 0 0 auto;
+}
+
+/* -------------------------------------------------- *
+ * Dialog: loot spell sources
+ * -------------------------------------------------- */
+
+.bws-sources-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bws-sources-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bws-sources-bulk {
+  display: flex;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+.bws-sources-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--bws-border);
+  border-radius: var(--bws-radius-sm);
+  background: var(--bws-bg-inset);
+  padding: 4px;
+}
+
+.bws-source-row {
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 6px;
+  border-radius: var(--bws-radius-sm);
+}
+
+.bws-source-row:hover { background: var(--bws-row-hover); }
+
+.bws-source-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bws-source-count {
+  color: var(--bws-text-dim);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
 }

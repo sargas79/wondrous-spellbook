@@ -13,7 +13,7 @@
 
 import { MODULE_ID, LOOT_FLAG, SETTINGS, template } from "./constants.js";
 import { getStoredSpells } from "./persistence.js";
-import { getRankBadge, getRankLabel } from "./spell-query.js";
+import { getRankBadge, getRankLabel, getRarityLabel } from "./spell-query.js";
 import { openSendToSlotDialog, resolveTargetActor } from "./slot-manager.js";
 import { getLootMeta, isLootSpellbook } from "./loot-generator.js";
 
@@ -105,6 +105,8 @@ export class LootBookApp extends HandlebarsApplicationMixin(ApplicationV2) {
       group.spells.push({
         ...spell,
         rankBadge: getRankBadge(spell.rank),
+        // Older books carry no rarity; those rows just render without the pill.
+        rarityLabel: spell.rarity ? getRarityLabel(spell.rarity) : "",
         learnedBy: names.length ? game.i18n.format("BWS.Loot.LearnedBy", { actors: names.join(", ") }) : "",
         alreadyLearned,
         // Consumption is per-actor: the page is spent for whoever copied it, not for

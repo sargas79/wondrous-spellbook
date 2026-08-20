@@ -261,6 +261,8 @@ function takeFrom(rng, bucket) {
  * @param {boolean} [options.includeFocus=false] Allow focus spells, which are not
  *   normally learnable from a book.
  * @param {string} [options.maxRarity] Rarity ceiling. Defaults to the setting.
+ * @param {string[]|null} [options.sources=null] Source keys (see `listSpellSources`) the
+ *   book may draw from. Null or empty means every source in the world.
  * @param {string} [options.seed] Seed string. A fresh one is rolled when omitted.
  * @returns {Promise<{ spells: object[], meta: object, name: string, shortfall: number }>}
  *   `shortfall` is how many spells the compendiums could not supply.
@@ -273,6 +275,7 @@ export async function generateLootSpellbook({
   includeCantrips = true,
   includeFocus = false,
   maxRarity,
+  sources = null,
   seed
 } = {}) {
   const profile = PROFILES[profileKey] ?? getDefaultProfile();
@@ -293,9 +296,14 @@ export async function generateLootSpellbook({
 
   const { spells: pool } = await loadAllSpells();
 
+  // An empty selection means "no restriction" rather than "no spells": a GM who
+  // unticks everything would otherwise be left with an unrollable form.
+  const sourceSet = Array.isArray(sources) && sources.length ? new Set(sources) : null;
+
   const eligible = pool.filter((spell) => {
     if (!includeFocus && spell.isFocus) return false;
     if (RARITIES.indexOf(spell.rarity) > rarityLimit) return false;
+    if (sourceSet && !sourceSet.has(spell.sourceKey)) return false;
     if (resolvedTradition !== "mixed" && !spell.traditions.includes(resolvedTradition)) return false;
     return true;
   });
@@ -349,6 +357,9 @@ export async function generateLootSpellbook({
       tradition: resolvedTradition,
       profile: profile.key,
       rarity,
+      // Recorded so a reroll from the same seed - and every per-row replacement -
+      // stays inside the same shelf of books.
+      sources: sourceSet ? [...sourceSet] : null,
       maxRank: ceiling,
       generatedBy: game.user?.id ?? null,
       generatedAt: Date.now(),
@@ -366,7 +377,8 @@ export async function generateLootSpellbook({
  *
  * @param {object} params
  * @param {object} params.meta Loot metadata describing the book. Its `rarity` - the rarity
- *   of the rarest page already present - is used as the ceiling for the replacement.
+ *   of the rarest page already present - is used as the ceiling for the replacement, and
+ *   its `sources` list, when set, keeps the replacement inside the same books.
  * @param {string[]} [params.exclude=[]] Spell uuids already in the book.
  * @param {number} params.rank Rank the replacement must match.
  * @param {boolean} [params.includeFocus=false] Allow focus spells.
@@ -376,12 +388,14 @@ export async function drawReplacement({ meta, exclude = [], rank, includeFocus =
   const { spells: pool } = await loadAllSpells();
   const rarityLimit = RARITIES.indexOf(meta.rarity ?? "common");
   const skip = new Set(exclude);
+  const sourceSet = Array.isArray(meta.sources) && meta.sources.length ? new Set(meta.sources) : null;
 
   const candidates = pool.filter((spell) => {
     if (spell.rank !== rank) return false;
     if (skip.has(spell.uuid)) return false;
     if (!includeFocus && spell.isFocus) return false;
     if (RARITIES.indexOf(spell.rarity) > rarityLimit) return false;
+    if (sourceSet && !sourceSet.has(spell.sourceKey)) return false;
     if (meta.tradition !== "mixed" && !spell.traditions.includes(meta.tradition)) return false;
     return true;
   });

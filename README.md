@@ -89,6 +89,13 @@ GMs get a **Roll loot** button in *My Spellbooks*. Pick a level, a tradition and
 size; the generator rolls a spell list capped at the rank that level can hold, previews
 it, and lets you swap or drop individual pages before committing.
 
+Each rolled page shows its rarity next to its traditions, and the **All sources** button
+opens a picker listing every book your compendiums provide spells from — Player Core,
+Secrets of Magic, a homebrew pack — with the number of spells each contributes. Tick only
+the ones your table uses and the roll draws from those alone; the choice is remembered for
+the next book, and per-page rerolls stay inside the same shelf. Leaving everything ticked
+means "no restriction", so a compendium installed later is picked up automatically.
+
 **Create item** writes the book either into the `Spellbook Loot` item folder or straight
 onto the selected token's actor. It is an ordinary `equipment` item — priced, rarity-tagged
 and carrying a readable spell list in its description — so it drags into loot chests and
@@ -161,12 +168,16 @@ api.sendToSlot({ uuid: "Compendium....." }); // open the Send to Slot dialog
 api.getUserSpellbooks();                    // JournalEntry[] the current user may see
 api.getAnimationsAvailable();               // boolean, re-evaluated live
 
+api.listSpellSources();                     // [{ key, label, count }] of every source
 api.openLootGenerator();                    // open the loot roller (GM)
 api.generateLootSpellbook({ level: 7 });    // headless roll -> { spells, meta, name }
 api.createLootSpellbook({ name, spells, meta, actors: [] }); // write it as an Item
 api.openLootBook(item);                     // open a rolled book's reader
 api.isLootSpellbook(item);                  // boolean
 ```
+
+`generateLootSpellbook` also takes `sources: [...]` — the same source keys the picker
+writes — to restrict a headless roll to particular books.
 
 `generateLootSpellbook` writes nothing, so it can be driven from a RollTable macro:
 

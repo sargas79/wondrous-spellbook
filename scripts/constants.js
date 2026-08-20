@@ -35,6 +35,7 @@ export const SETTINGS = Object.freeze({
   LOOT_FOLDER_NAME: "lootFolderName",
   LOOT_PROFILE: "lootDefaultProfile",
   LOOT_MAX_RARITY: "lootMaxRarity",
+  LOOT_SOURCES: "lootSources",
   TRACK_LEARNED: "trackLearned",
   CONSUME_ON_LEARN: "consumeOnLearn"
 });
