@@ -1,0 +1,836 @@
+/*
+ * Blizzard's Wondrous Spellbook
+ *
+ * A Nocturne-flavoured dark palette tuned to sit comfortably inside Foundry's own
+ * chrome. Everything is scoped under `.bws` (or `.bws-dialog`) so the module never
+ * leaks styling into the PF2e sheets it injects into.
+ */
+
+.bws,
+.bws-dialog {
+  --bws-bg: #14151d;
+  --bws-bg-raised: #1b1c26;
+  --bws-bg-inset: #101119;
+  --bws-row-hover: #21222e;
+  --bws-border: #2a2b38;
+  --bws-border-soft: #23242f;
+
+  --bws-text: #e6e7ee;
+  --bws-text-muted: #8b8d9e;
+  --bws-text-dim: #6a6c7d;
+
+  --bws-accent: #7c6df2;
+  --bws-accent-soft: #6d5ce7;
+  --bws-accent-bg: rgba(124, 109, 242, 0.14);
+  --bws-accent-border: rgba(124, 109, 242, 0.45);
+
+  --bws-danger: #e5484d;
+
+  --bws-radius: 6px;
+  --bws-radius-sm: 4px;
+  --bws-row-height: 30px;
+}
+
+/* -------------------------------------------------- *
+ * Window shell
+ * -------------------------------------------------- */
+
+.bws .window-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  background: var(--bws-bg);
+  color: var(--bws-text);
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.bws input,
+.bws select,
+.bws-dialog input,
+.bws-dialog select {
+  background: var(--bws-bg-inset);
+  border: 1px solid var(--bws-border);
+  border-radius: var(--bws-radius-sm);
+  color: var(--bws-text);
+  font-size: 13px;
+  height: 30px;
+  padding: 0 8px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.bws input:focus,
+.bws select:focus,
+.bws-dialog input:focus,
+.bws-dialog select:focus {
+  border-color: var(--bws-accent);
+  box-shadow: 0 0 0 2px var(--bws-accent-bg);
+  outline: none;
+}
+
+.bws input:disabled,
+.bws select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------- *
+ * Header / filter bar
+ * -------------------------------------------------- */
+
+.bws-header {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto minmax(160px, 1fr);
+  grid-template-areas:
+    "name tradition search"
+    "name tradition focus";
+  align-items: end;
+  gap: 8px 16px;
+  padding: 12px 14px;
+  background: var(--bws-bg-raised);
+  border-bottom: 1px solid var(--bws-border);
+  flex: 0 0 auto;
+}
+
+.bws-field-name { grid-area: name; }
+.bws-field-tradition { grid-area: tradition; }
+.bws-field-search { grid-area: search; }
+.bws-field-focus { grid-area: focus; }
+
+.bws-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.bws-field > label,
+.bws-field-label {
+  color: var(--bws-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.bws-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.bws-search-wrap i {
+  position: absolute;
+  left: 9px;
+  color: var(--bws-text-dim);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.bws-search-wrap input {
+  width: 100%;
+  padding-left: 26px;
+}
+
+/* Tradition segmented control */
+
+.bws-segments {
+  display: inline-flex;
+  border: 1px solid var(--bws-border);
+  border-radius: var(--bws-radius-sm);
+  overflow: hidden;
+  background: var(--bws-bg-inset);
+}
+
+.bws-segment {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--bws-border);
+  color: var(--bws-text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  height: 30px;
+  line-height: 1;
+  padding: 0 12px;
+  transition: background 120ms ease, color 120ms ease;
+  white-space: nowrap;
+}
+
+.bws-segment:last-child { border-right: none; }
+
+.bws-segment:hover {
+  background: var(--bws-row-hover);
+  color: var(--bws-text);
+}
+
+.bws-segment.is-active {
+  background: var(--bws-accent-bg);
+  color: var(--bws-text);
+  box-shadow: inset 0 0 0 1px var(--bws-accent-border);
+}
+
+.bws-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--bws-text);
+  cursor: pointer;
+  font-size: 12px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.bws-checkbox input[type="checkbox"] {
+  accent-color: var(--bws-accent);
+  height: 14px;
+  width: 14px;
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+/* -------------------------------------------------- *
+ * Body: results list + selection panel
+ * -------------------------------------------------- */
+
+.bws-body {
+  display: grid;
+  grid-template-columns: 1fr minmax(230px, 290px);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.bws-spell-list {
+  overflow-y: auto;
+  min-height: 0;
+  border-right: 1px solid var(--bws-border);
+}
+
+.bws-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px 5px;
+  position: sticky;
+  top: 0;
+  background: var(--bws-bg);
+  z-index: 1;
+}
+
+.bws-group-title {
+  color: var(--bws-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.bws-group-count {
+  color: var(--bws-text-dim);
+  font-size: 10px;
+}
+
+.bws-spell-row {
+  display: grid;
+  grid-template-columns: 26px minmax(120px, 1fr) 34px auto 30px;
+  align-items: center;
+  gap: 8px;
+  height: var(--bws-row-height);
+  padding: 0 10px 0 4px;
+  border-left: 2px solid transparent;
+  cursor: default;
+}
+
+.bws-spell-row:hover { background: var(--bws-row-hover); }
+
+.bws-spell-row.is-selected {
+  background: var(--bws-accent-bg);
+  border-left-color: var(--bws-accent);
+}
+
+.bws-row-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bws-row-check input[type="checkbox"] {
+  accent-color: var(--bws-accent);
+  height: 14px;
+  width: 14px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.bws-spell-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Action cost glyph: a small diamond pip with the action count inside. */
+.bws-action-cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--bws-text-muted);
+  font-size: 11px;
+  justify-self: start;
+}
+
+.bws-action-cost::before {
+  content: "";
+  height: 7px;
+  width: 7px;
+  background: currentColor;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  opacity: 0.75;
+}
+
+.bws-action-cost.is-empty::before { display: none; }
+.bws-action-cost.is-text { font-size: 10px; }
+
+.bws-traditions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.bws-pill {
+  background: #262735;
+  border: 1px solid var(--bws-border-soft);
+  border-radius: 3px;
+  color: #b8bacb;
+  font-size: 10px;
+  line-height: 1;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+
+.bws-pill-arcane { color: #8fb4ff; }
+.bws-pill-divine { color: #ffd48a; }
+.bws-pill-occult { color: #d79bff; }
+.bws-pill-primal { color: #8fe0a8; }
+.bws-pill-focus {
+  color: var(--bws-accent);
+  border-color: var(--bws-accent-border);
+}
+
+.bws-send {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-radius: var(--bws-radius-sm);
+  color: var(--bws-text-dim);
+  cursor: pointer;
+  height: 24px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.bws-send:hover {
+  background: var(--bws-accent-bg);
+  color: var(--bws-accent);
+}
+
+/* Selection panel */
+
+.bws-selected {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bws-bg-raised);
+}
+
+.bws-selected-header {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 11px 12px 8px;
+  border-bottom: 1px solid var(--bws-border-soft);
+}
+
+.bws-selected-label {
+  color: var(--bws-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.bws-selected-count {
+  color: var(--bws-accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bws-selected-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 6px 0;
+}
+
+.bws-selected-row {
+  display: grid;
+  grid-template-columns: 26px 1fr 22px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  height: 26px;
+}
+
+.bws-selected-row:hover { background: var(--bws-row-hover); }
+
+.bws-rank-badge {
+  color: var(--bws-text-dim);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+.bws-selected-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bws-remove {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--bws-text-dim);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0;
+  transition: color 120ms ease;
+}
+
+.bws-remove:hover { color: var(--bws-danger); }
+
+.bws-selected-empty {
+  color: var(--bws-text-dim);
+  font-size: 11.5px;
+  line-height: 1.5;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.bws-selected-footer {
+  border-top: 1px solid var(--bws-border-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px 12px;
+  flex: 0 0 auto;
+}
+
+.bws-ownership-note {
+  align-items: center;
+  color: var(--bws-text-dim);
+  display: flex;
+  font-size: 10.5px;
+  gap: 6px;
+  margin: 0 0 2px;
+}
+
+/* -------------------------------------------------- *
+ * Buttons
+ * -------------------------------------------------- */
+
+.bws-button,
+.bws-dialog button.bws-button {
+  align-items: center;
+  appearance: none;
+  background: var(--bws-bg-inset);
+  border: 1px solid var(--bws-border);
+  border-radius: var(--bws-radius-sm);
+  color: var(--bws-text);
+  cursor: pointer;
+  display: flex;
+  font-size: 12.5px;
+  gap: 7px;
+  height: 32px;
+  justify-content: center;
+  transition: background 120ms ease, border-color 120ms ease, opacity 120ms ease;
+  width: 100%;
+}
+
+.bws-button:hover:not(:disabled) {
+  background: var(--bws-row-hover);
+  border-color: var(--bws-text-dim);
+}
+
+.bws-button-primary {
+  background: var(--bws-accent-bg);
+  border-color: var(--bws-accent-border);
+  color: var(--bws-text);
+}
+
+.bws-button-primary:hover:not(:disabled) {
+  background: rgba(124, 109, 242, 0.24);
+  border-color: var(--bws-accent);
+}
+
+.bws-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.bws-button-small {
+  height: 26px;
+  font-size: 11.5px;
+  padding: 0 10px;
+  width: auto;
+}
+
+.bws-icon-button {
+  appearance: none;
+  background: transparent;
+  border: none;
+  border-radius: var(--bws-radius-sm);
+  color: var(--bws-text-dim);
+  cursor: pointer;
+  height: 26px;
+  width: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.bws-icon-button:hover:not(:disabled) {
+  background: var(--bws-accent-bg);
+  color: var(--bws-accent);
+}
+
+.bws-icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.bws-icon-danger:hover:not(:disabled) {
+  background: rgba(229, 72, 77, 0.14);
+  color: var(--bws-danger);
+}
+
+/* -------------------------------------------------- *
+ * Footer status strip
+ * -------------------------------------------------- */
+
+.bws-footer {
+  align-items: center;
+  background: var(--bws-bg-raised);
+  border-top: 1px solid var(--bws-border);
+  color: var(--bws-text-dim);
+  display: flex;
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 7px 14px;
+}
+
+.bws-status {
+  align-items: center;
+  display: inline-flex;
+  gap: 6px;
+}
+
+/* -------------------------------------------------- *
+ * Empty states
+ * -------------------------------------------------- */
+
+.bws-empty {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  padding: 48px 28px;
+  text-align: center;
+}
+
+.bws-empty > i {
+  color: var(--bws-text-dim);
+  font-size: 26px;
+  opacity: 0.55;
+  margin-bottom: 2px;
+}
+
+.bws-empty-title {
+  color: var(--bws-text);
+  font-size: 13.5px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.bws-empty-hint {
+  color: var(--bws-text-dim);
+  font-size: 11.5px;
+  line-height: 1.55;
+  margin: 0;
+  max-width: 30ch;
+}
+
+.bws-empty .bws-button { margin-top: 6px; width: auto; padding: 0 14px; }
+
+/* -------------------------------------------------- *
+ * My Spellbooks browser
+ * -------------------------------------------------- */
+
+.bws-browser .window-content { padding: 0; }
+
+.bws-browser-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.bws-browser-header {
+  align-items: center;
+  background: var(--bws-bg-raised);
+  border-bottom: 1px solid var(--bws-border);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 10px 12px;
+  flex: 0 0 auto;
+}
+
+.bws-browser-scope {
+  color: var(--bws-text-dim);
+  font-size: 11px;
+}
+
+.bws-dot { opacity: 0.5; margin: 0 2px; }
+
+.bws-book-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+
+.bws-book-row {
+  align-items: center;
+  border-bottom: 1px solid var(--bws-border-soft);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 9px 12px;
+}
+
+.bws-book-row:hover { background: var(--bws-row-hover); }
+.bws-book-row:last-child { border-bottom: none; }
+
+.bws-book-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.bws-book-name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bws-book-meta {
+  align-items: center;
+  color: var(--bws-text-dim);
+  display: flex;
+  font-size: 10.5px;
+  gap: 8px;
+}
+
+.bws-readonly-tag {
+  align-items: center;
+  color: var(--bws-text-dim);
+  display: inline-flex;
+  gap: 4px;
+}
+
+.bws-book-ranks {
+  display: flex;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.bws-book-ranks .bws-rank-badge {
+  background: #262735;
+  border-radius: 3px;
+  padding: 2px 5px;
+  text-align: center;
+}
+
+.bws-book-controls {
+  display: flex;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+/* -------------------------------------------------- *
+ * Dialogs: Send to Slot, Animation config
+ * -------------------------------------------------- */
+
+.bws-dialog .window-content {
+  background: var(--bws-bg);
+  color: var(--bws-text);
+  font-size: 13px;
+}
+
+.bws-slot-inner,
+.bws-anim-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 320px;
+  padding: 4px 2px;
+}
+
+.bws-slot-spell,
+.bws-anim-spell {
+  align-items: center;
+  background: var(--bws-bg-raised);
+  border: 1px solid var(--bws-border-soft);
+  border-radius: var(--bws-radius);
+  display: flex;
+  gap: 10px;
+  padding: 9px 11px;
+}
+
+.bws-slot-spell img,
+.bws-anim-spell img {
+  border: 1px solid var(--bws-border);
+  border-radius: var(--bws-radius-sm);
+  flex: 0 0 auto;
+  height: 34px;
+  object-fit: cover;
+  width: 34px;
+}
+
+.bws-slot-spell-text,
+.bws-anim-spell-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bws-slot-spell-name,
+.bws-anim-spell-name {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.bws-slot-spell-sub,
+.bws-anim-spell-sub {
+  color: var(--bws-text-dim);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bws-slot-fields {
+  display: grid;
+  grid-template-columns: 1fr 130px;
+  gap: 12px;
+}
+
+.bws-slot-fields select { width: 100%; }
+
+.bws-anim-label {
+  color: var(--bws-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  margin-bottom: -8px;
+}
+
+.bws-anim-dialog input[type="text"] { width: 100%; }
+
+.bws-anim-hint {
+  color: var(--bws-text-dim);
+  font-size: 11px;
+  line-height: 1.5;
+  margin: -8px 0 0;
+}
+
+.bws-anim-browse {
+  align-items: center;
+  appearance: none;
+  align-self: flex-start;
+  background: var(--bws-bg-inset);
+  border: 1px solid var(--bws-border);
+  border-radius: var(--bws-radius-sm);
+  color: var(--bws-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 11.5px;
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px;
+}
+
+.bws-anim-browse:hover {
+  background: var(--bws-row-hover);
+  color: var(--bws-text);
+}
+
+.bws-empty-note {
+  color: var(--bws-text-muted);
+  line-height: 1.6;
+  margin: 4px 0;
+  max-width: 42ch;
+}
+
+/* -------------------------------------------------- *
+ * Injected controls on the PF2e character sheet
+ *
+ * Only ever present when JB2A and Sequencer are both active. Kept visually quiet so
+ * it reads as part of the sheet's own control cluster rather than an add-on.
+ * -------------------------------------------------- */
+
+.bws-anim-button {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-size: 12px;
+  opacity: 0.55;
+  padding: 0 3px;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+
+.bws-anim-button:hover {
+  opacity: 1;
+  color: var(--bws-accent, #7c6df2);
+}
+
+.bws-anim-button.is-set {
+  color: #7c6df2;
+  opacity: 0.95;
+}
+
+/* -------------------------------------------------- *
+ * Sidebar button
+ * -------------------------------------------------- */
+
+.bws-sidebar-button {
+  cursor: pointer;
+}
+
+.bws-sidebar-button:hover {
+  color: #7c6df2;
+}

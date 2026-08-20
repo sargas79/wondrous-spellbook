@@ -1,0 +1,32 @@
+{{!-- The one write path from a spellbook to an actor: pick an entry, then a rank. --}}
+<div class="bws-slot-inner">
+
+  <div class="bws-slot-spell">
+    <img src="{{spell.img}}" alt="" />
+    <div class="bws-slot-spell-text">
+      <span class="bws-slot-spell-name">{{spell.name}}</span>
+      <span class="bws-slot-spell-sub">{{targetLine}}</span>
+    </div>
+  </div>
+
+  <div class="bws-slot-fields">
+    <div class="bws-field">
+      <label for="bws-slot-entry">{{localize "BWS.Slot.EntryLabel"}}</label>
+      <select id="bws-slot-entry" name="entry">
+        {{#each entries}}
+          <option value="{{id}}">{{name}}{{#if kind}} ({{kind}}){{/if}}</option>
+        {{/each}}
+      </select>
+    </div>
+
+    <div class="bws-field">
+      <label for="bws-slot-rank">{{localize "BWS.Slot.RankLabel"}}</label>
+      <select id="bws-slot-rank" name="rank" {{#if isCantrip}}disabled{{/if}}>
+        {{#each ranks}}
+          <option value="{{rank}}" {{#if disabled}}disabled{{/if}}>{{label}}</option>
+        {{/each}}
+      </select>
+    </div>
+  </div>
+
+</div>
