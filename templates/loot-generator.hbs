@@ -3,14 +3,15 @@
 
   <section class="bws-loot-form">
     <div class="bws-field bws-loot-field-level">
-      <span class="bws-field-label">{{localize "BWS.Loot.LevelLabel"}}</span>
-      <input type="number" name="level" min="1" max="{{maxLevel}}" step="1" value="{{level}}" />
+      <label for="bws-loot-level">{{localize "BWS.Loot.LevelLabel"}}</label>
+      <input id="bws-loot-level" type="number" name="level" min="1" max="{{maxLevel}}" step="1"
+             value="{{level}}" />
       <span class="bws-field-hint">{{localize "BWS.Loot.MaxRankHint" rank=maxRank}}</span>
     </div>
 
     <div class="bws-field">
-      <span class="bws-field-label">{{localize "BWS.Loot.TraditionLabel"}}</span>
-      <select name="tradition">
+      <label for="bws-loot-tradition">{{localize "BWS.Loot.TraditionLabel"}}</label>
+      <select id="bws-loot-tradition" name="tradition">
         {{#each traditions}}
           <option value="{{key}}" {{selected selected}}>{{label}}</option>
         {{/each}}
@@ -18,8 +19,8 @@
     </div>
 
     <div class="bws-field">
-      <span class="bws-field-label">{{localize "BWS.Loot.ProfileLabel"}}</span>
-      <select name="profile">
+      <label for="bws-loot-profile">{{localize "BWS.Loot.ProfileLabel"}}</label>
+      <select id="bws-loot-profile" name="profile">
         {{#each profiles}}
           <option value="{{key}}" {{selected selected}}>{{label}}</option>
         {{/each}}
@@ -27,8 +28,8 @@
     </div>
 
     <div class="bws-field">
-      <span class="bws-field-label">{{localize "BWS.Loot.RarityLabel"}}</span>
-      <select name="maxRarity">
+      <label for="bws-loot-rarity">{{localize "BWS.Loot.RarityLabel"}}</label>
+      <select id="bws-loot-rarity" name="maxRarity">
         {{#each rarities}}
           <option value="{{key}}" {{selected selected}}>{{label}}</option>
         {{/each}}
@@ -36,15 +37,16 @@
     </div>
 
     <div class="bws-field">
-      <span class="bws-field-label">{{localize "BWS.Loot.CountLabel"}}</span>
-      <input type="number" name="count" min="1" max="60" step="1" value="{{count}}"
+      <label for="bws-loot-count">{{localize "BWS.Loot.CountLabel"}}</label>
+      <input id="bws-loot-count" type="number" name="count" min="1" max="60" step="1" value="{{count}}"
              placeholder="{{localize 'BWS.Loot.CountAuto'}}" />
+      <span class="bws-field-hint">{{localize "BWS.Loot.CountHint"}}</span>
     </div>
 
     <div class="bws-field bws-loot-field-seed">
-      <span class="bws-field-label">{{localize "BWS.Loot.SeedLabel"}}</span>
+      <label for="bws-loot-seed">{{localize "BWS.Loot.SeedLabel"}}</label>
       <div class="bws-seed-row">
-        <input type="text" name="seed" value="{{seed}}" spellcheck="false" />
+        <input id="bws-loot-seed" type="text" name="seed" value="{{seed}}" spellcheck="false" />
         <button type="button" class="bws-icon-button" data-action="newSeed"
                 data-tooltip="{{localize 'BWS.Loot.NewSeed'}}"
                 aria-label="{{localize 'BWS.Loot.NewSeed'}}">
@@ -120,12 +122,12 @@
 
   <footer class="bws-loot-footer">
     <div class="bws-field bws-loot-field-name">
-      <span class="bws-field-label">{{localize "BWS.Loot.NameLabel"}}</span>
-      <input type="text" name="bookName" value="{{bookName}}"
-             placeholder="{{localize 'BWS.Loot.NamePlaceholder'}}" />
+      <label for="bws-loot-name">{{localize "BWS.Loot.NameLabel"}}</label>
+      <input id="bws-loot-name" type="text" name="bookName" value="{{bookName}}"
+             placeholder="{{localize 'BWS.Loot.NamePlaceholder'}}" autocomplete="off" />
     </div>
 
-    <div class="bws-loot-targets">
+    <div class="bws-loot-targets" role="radiogroup" aria-label="{{localize 'BWS.Loot.TargetLabel'}}">
       <label class="bws-checkbox">
         <input type="radio" name="target" value="directory" {{checked targetIsDirectory}} />
         <span>{{localize "BWS.Loot.TargetFolder" folder=folderName}}</span>

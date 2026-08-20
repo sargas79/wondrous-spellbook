@@ -254,7 +254,9 @@ function takeFrom(rng, bucket) {
  * @param {number} [options.level=5] Character level the book is rolled for, 1-20.
  * @param {string} [options.tradition="random"] A tradition slug, `random`, or `mixed`.
  * @param {string} [options.profile] Key from {@link PROFILES}. Defaults to the setting.
- * @param {number|null} [options.count=null] Spell count, or null to take it from the profile.
+ * @param {number|null} [options.count=null] Number of ranked spells, or null to take it
+ *   from the profile. Cantrips are drawn on top of this, so a book can hold more entries
+ *   than the count asks for.
  * @param {boolean} [options.includeCantrips=true] Add a handful of cantrips.
  * @param {boolean} [options.includeFocus=false] Allow focus spells, which are not
  *   normally learnable from a book.

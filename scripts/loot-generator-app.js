@@ -44,7 +44,11 @@ export class LootGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     this.profile = options.profile ?? getDefaultProfile().key;
     /** @type {string} */
     this.maxRarity = options.maxRarity ?? getDefaultMaxRarity();
-    /** @type {number|null} Explicit spell count, or null to let the profile decide. */
+    /**
+     * Explicit ranked-spell count, or null to let the profile decide. Cantrips are
+     * drawn on top of it, which is what the field's hint says in the UI.
+     * @type {number|null}
+     */
     this.count = null;
     /** @type {boolean} */
     this.includeCantrips = true;
