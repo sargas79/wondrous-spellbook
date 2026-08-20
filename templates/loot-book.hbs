@@ -1,0 +1,52 @@
+{{!-- Player-facing reader. Storage only: Learn hands off to the Send to Slot dialog. --}}
+<div class="bws-loot-book-inner">
+
+  <header class="bws-loot-book-header">
+    {{#if img}}<img class="bws-loot-book-art" src="{{img}}" alt="" />{{/if}}
+    <div class="bws-loot-book-meta">
+      <span class="bws-loot-book-line">{{metaLine}}</span>
+      <span class="bws-loot-book-target{{#unless hasTarget}} is-warning{{/unless}}">{{targetLine}}</span>
+      {{#if seedLine}}<span class="bws-loot-book-seed">{{seedLine}}</span>{{/if}}
+    </div>
+  </header>
+
+  <div class="bws-loot-spells">
+    {{#if hasSpells}}
+      {{#each groups}}
+        <div class="bws-group-header">
+          <span class="bws-group-title">{{label}}</span>
+        </div>
+        {{#each spells}}
+          <div class="bws-spell-row{{#if alreadyLearned}} is-learned{{/if}}">
+            <span class="bws-rank-badge">{{rankBadge}}</span>
+            <span class="bws-spell-name" title="{{name}}">{{name}}</span>
+            {{#if learnedBy}}
+              <span class="bws-learned-tag" title="{{learnedBy}}">
+                <i class="fa-solid fa-check"></i> {{learnedBy}}
+              </span>
+            {{/if}}
+            <button type="button" class="bws-icon-button bws-learn" data-action="learn" data-uuid="{{uuid}}"
+                    data-tooltip="{{localize 'BWS.Loot.Learn'}}"
+                    aria-label="{{localize 'BWS.Loot.Learn'}}"
+                    {{#if disabled}}disabled{{/if}}>
+              <i class="fa-solid fa-graduation-cap"></i>
+            </button>
+          </div>
+        {{/each}}
+      {{/each}}
+    {{else}}
+      <div class="bws-empty">
+        <i class="fa-solid fa-book-skull"></i>
+        <p class="bws-empty-title">{{localize "BWS.Loot.EmptyBook"}}</p>
+      </div>
+    {{/if}}
+  </div>
+
+  <footer class="bws-loot-book-footer">
+    <p class="bws-ownership-note">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      {{localize "BWS.Loot.ReaderNote"}}
+    </p>
+  </footer>
+
+</div>

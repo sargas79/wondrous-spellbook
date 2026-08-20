@@ -871,3 +871,186 @@
 [data-tool="bws-spellbook"]:hover {
   color: #7c6df2;
 }
+
+/* -------------------------------------------------- *
+ * Loot spellbooks
+ * -------------------------------------------------- */
+
+.bws-browser-actions {
+  display: flex;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.bws-loot-inner,
+.bws-loot-book-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.bws-loot-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 10px;
+  padding: 10px 12px;
+  background: var(--bws-bg-raised);
+  border-bottom: 1px solid var(--bws-border);
+  flex: 0 0 auto;
+}
+
+.bws-loot-form .bws-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.bws-field-hint {
+  color: var(--bws-text-dim);
+  font-size: 10px;
+}
+
+.bws-seed-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bws-seed-row input { flex: 1 1 auto; min-width: 0; }
+
+.bws-loot-toggles {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bws-loot-toggles .bws-button { margin-left: auto; }
+
+.bws-loot-result {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--bws-border-soft);
+  flex: 0 0 auto;
+}
+
+.bws-loot-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bws-loot-summary-line {
+  color: var(--bws-text-muted);
+  font-size: 11px;
+}
+
+.bws-loot-tag {
+  color: var(--bws-accent);
+  font-size: 10px;
+  border: 1px solid var(--bws-accent-border);
+  background: var(--bws-accent-bg);
+  border-radius: var(--bws-radius-sm);
+  padding: 1px 5px;
+}
+
+.bws-loot-warning {
+  color: #e0b64a;
+  font-size: 11px;
+  margin: 4px 0 0;
+}
+
+.bws-loot-preview,
+.bws-loot-spells {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.bws-loot-footer {
+  border-top: 1px solid var(--bws-border);
+  background: var(--bws-bg-raised);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.bws-loot-footer .bws-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bws-loot-targets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--bws-text-muted);
+}
+
+.bws-loot-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.bws-loot-book-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bws-bg-raised);
+  border-bottom: 1px solid var(--bws-border);
+  flex: 0 0 auto;
+}
+
+.bws-loot-book-art {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border: 1px solid var(--bws-border);
+  border-radius: var(--bws-radius-sm);
+  flex: 0 0 auto;
+}
+
+.bws-loot-book-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bws-loot-book-line { color: var(--bws-text-muted); font-size: 11px; }
+.bws-loot-book-seed { color: var(--bws-text-dim); font-size: 10px; }
+
+.bws-loot-book-target {
+  color: var(--bws-text);
+  font-size: 11px;
+}
+
+.bws-loot-book-target.is-warning { color: #e0b64a; }
+
+.bws-learned-tag {
+  color: var(--bws-text-dim);
+  font-size: 10px;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bws-spell-row.is-learned .bws-spell-name { color: var(--bws-text-muted); }
+
+.bws-learn:not(:disabled) { color: var(--bws-accent); }
+
+.bws-loot-book-footer {
+  border-top: 1px solid var(--bws-border);
+  padding: 8px 12px;
+  flex: 0 0 auto;
+}
